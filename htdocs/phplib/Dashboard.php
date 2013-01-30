@@ -52,6 +52,23 @@ require_once(dirname(__FILE__) . '/../config.php');
 
 class Dashboard {
 
+    // Extend this class and create new arrays like this
+    //
+    /** The $..._TABS arrays define which tabs are shown at the tops of various
+     * pages. They also control what is shown on the index page.
+     *
+     * Each entry is the name of the tab, and the URL to open.
+     * URLs don't have to redirect to other dashboard pages, use them to go to
+     * external sites too! Want to add a link to the Hadoop DFS page? Easy!
+    */
+     /*
+     public static $DB_TABS = array(
+        'PGBouncer' => '/example_pgbouncer.php',
+        'PostgreSQL Queries' => '/example_postgresql_queries.php',
+     );
+    */
+
+
     /**
      * @param string $filename
      * @return string
