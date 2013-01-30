@@ -48,6 +48,7 @@ $pgbouncer_cluster_arr = array(
     '<gangla db cluster name>' => array('name' => '<ganglia db cluster name>', 'machines' => 'db1.example.com'),
 );
 
+// now pull in local overrides for the defaults
 require_once(dirname(__FILE__) . '/../config.php');
 
 
