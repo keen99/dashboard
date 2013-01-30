@@ -1,4 +1,4 @@
-<?
+<?php
 
 /*
 	Override global setup in phplib/Dashboard.php
