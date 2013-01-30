@@ -1,5 +1,6 @@
 <?php
 require_once('phplib/Dashboard.php');
+require_once('dashboards.php');
 
 $sections = array(
     'Application' => array(
