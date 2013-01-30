@@ -46,6 +46,10 @@ $pgbouncer_cluster_arr = array(
 );
 
 
+// now pull in local overrides for the defaults
+require_once(dirname(__FILE__) . '/../config.php');
+
+
 class Dashboard {
 
     /** The $..._TABS arrays define which tabs are shown at the tops of various 
