@@ -14,12 +14,11 @@ $graphite_server = "graphite.example.com";
 $graphite_server_dev = "graphite.dev.example.com";
 $splunk_server = "splunk.example.com";
 
-/** Hadoop name node */  
+// Hadoop name node */  
 $hadoopnn = "nn1.example.com";
-/** Ganglia cluster which contains $hadoopnn */
+// Ganglia cluster which contains $hadoopnn 
 $gangliacluster_nn = "HadoopNN";
-/** Ganglia cluster which contains hadoop data nodes */
+// Ganglia cluster which contains hadoop data nodes 
 $gangliacluster_dn = "HadoopDN";
-
 
 */
