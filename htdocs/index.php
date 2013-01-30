@@ -2,6 +2,9 @@
 require_once('phplib/Dashboard.php');
 
 $sections = array(
+    'My shtuf' => array(
+        'Stuff' => Dashboard::$STUFF_TABS,
+    ),
     'Application' => array(
         'Deploy' => Dashboard::$DEPLOY_TABS,
     ),

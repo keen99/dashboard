@@ -1,5 +1,8 @@
 <?php
 
+// I should have a 'config' file that overrides me puhlease
+
+
 ini_set('display_errors', true);
 
 require_once('Controls.php');
@@ -24,12 +27,12 @@ require_once('TimingUtils.php');
  * won't hurt it :-)
  */
 
-$cacti_server = "cacti.example.com";
+$cacti_server = "monitor.easod.ea.com";
 $chef_server = "chef.example.com";
 $fitb_server = "fitb.example.com";
 $ganglia_server = "ganglia.example.com";
 $ganglia_server_dev = "ganglia.dev.example.com";
-$graphite_server = "graphite.example.com";
+$graphite_server = "ec2-184-73-211-106.compute-1.amazonaws.com";
 $graphite_server_dev = "graphite.dev.example.com";
 $splunk_server = "splunk.example.com";
 
@@ -55,6 +58,11 @@ class Dashboard {
      * URLs don't have to redirect to other dashboard pages, use them to go to 
      * external sites too! Want to add a link to the Hadoop DFS page? Easy!
      */
+
+
+    public static $STUFF_TABS = array(
+        'test' => '/testtab.php',
+    );
 
     public static $DB_TABS = array(
         'PGBouncer' => '/example_pgbouncer.php',
