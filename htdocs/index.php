@@ -1,7 +1,7 @@
 <?php
 require_once('sections.php');
 
-<!DOCTYPE html>
+?><!DOCTYPE html>
 <html>
 <head>
     <title>Dashboards</title>
