@@ -3,8 +3,6 @@ require_once('phplib/Dashboard.php');
 require_once('dashboards.php');
 
 $sections = array(
-
-$sections = array(
     'My shtuf' => array(
         'Stuff' => Dashboard::$STUFF_TABS,
     ),
