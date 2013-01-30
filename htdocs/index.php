@@ -1,5 +1,5 @@
 <?php
-require_once('sections.php');
+require_once('conf/sections.php');
 
 ?><!DOCTYPE html>
 <html>
