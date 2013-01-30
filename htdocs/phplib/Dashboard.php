@@ -27,7 +27,7 @@ require_once('TimingUtils.php');
  * won't hurt it :-)
  */
 
-$cacti_server = "monitor.easod.ea.com";
+$cacti_server = "monitor.easod.ea.comasdfasdfsfasdf";
 $chef_server = "chef.example.com";
 $fitb_server = "fitb.example.com";
 $ganglia_server = "ganglia.example.com";
@@ -48,6 +48,8 @@ $pgbouncer_cluster_arr = array(
     '<gangla db cluster name>' => array('name' => '<ganglia db cluster name>', 'machines' => 'db1.example.com'),
 );
 
+require_once(dirname(__FILE__) . '/../config.php');
+
 
 class Dashboard {
 
@@ -61,35 +63,36 @@ class Dashboard {
 
 
     public static $STUFF_TABS = array(
-        'test' => '/testtab.php',
+        'cacti' => 'testtab.php',
+        'graphiet' => 'testgraphite.php',
     );
 
     public static $DB_TABS = array(
-        'PGBouncer' => '/example_pgbouncer.php',
-        'PostgreSQL Queries' => '/example_postgresql_queries.php',
+        'PGBouncer' => 'example_pgbouncer.php',
+        'PostgreSQL Queries' => 'example_postgresql_queries.php',
     );
 
     public static $DEPLOY_TABS = array(
-        'FITB' => '/example_fitb.php',
-        'New Relic' => '/example_newrelic.php',
+        'FITB' => 'example_fitb.php',
+        'New Relic' => 'example_newrelic.php',
     );
 
     public static $HADOOP_TABS = array(
-        'Overview' => '/example_hadoop/overview.php',
-        'DFS' => '/example_hadoop/dfs.php',
-        'Jobs' => '/example_hadoop/jobs.php',
-        'Java Process Metrics' => '/example_hadoop/java_process.php',
-        'HBase' => '/example_hadoop/hbase.php',
+        'Overview' => 'example_hadoop/overview.php',
+        'DFS' => 'example_hadoop/dfs.php',
+        'Jobs' => 'example_hadoop/jobs.php',
+        'Java Process Metrics' => 'example_hadoop/java_process.php',
+        'HBase' => 'example_hadoop/hbase.php',
     );
 
     public static $NETWORK_TABS = array(
-        'FITB' => '/example_fitb.php',
-        'Netstat' => '/example_netstat.php',
-        'Mem info' => '/example_meminfo.php',
+        'FITB' => 'example_fitb.php',
+        'Netstat' => 'example_netstat.php',
+        'Mem info' => 'example_meminfo.php',
     );
 
     public static $TIME_TABS = array(
-        'Time' => '/example_time.php',
+        'Time' => 'example_time.php',
     );
 
     /**

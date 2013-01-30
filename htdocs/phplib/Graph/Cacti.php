@@ -41,7 +41,7 @@ class Graph_Cacti {
         $p['graph_start'] = $this->timeToSeconds($this->time);
         $p['graph_end'] = isset($this->until_time) ? $this->timeToSeconds($this->until_time) : time();
         return 'https://' . $cacti_server . '/cacti/graph_image.php?'
-               . http_build_query($p);
+               . http_build_query($p) . '&graph_nolegend=true';
     }
 
     public function getPageURL() {
