@@ -49,7 +49,7 @@ $pgbouncer_cluster_arr = array(
 );
 
 // now pull in local overrides for the defaults
-require_once(dirname(__FILE__) . '/../config.php');
+require_once(dirname(__FILE__) . '/../conf/config.php');
 
 
 class Dashboard {
