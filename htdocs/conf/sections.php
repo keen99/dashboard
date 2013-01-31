@@ -10,7 +10,7 @@ $sections = array(
         'Database' => Local_Dashboard::$DB_TABS,
         'Network' => Local_Dashboard::$NETWORK_TABS,
         'Chef' => array(
-            'chef' => 'tabs/example_chef.php',
+            'chef' => 'example_chef.php',
         ),
         'Hadoop' => Local_Dashboard::$HADOOP_TABS,
         'Util' => Local_Dashboard::$TIME_TABS,
