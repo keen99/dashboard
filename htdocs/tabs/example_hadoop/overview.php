@@ -3,7 +3,7 @@
 // the title used for the page
 $title = 'Hadoop: Overview';
 
-require_once '../phplib/Dashboard.php';
+require_once 'phplib/Dashboard.php';
 
 $page_js_imports = array(
     'assets/js/jquery-ui-1.8.16.min.js'
@@ -58,4 +58,4 @@ $graphs = array(
 $tabs = Dashboard::$HADOOP_TABS;
 $tab_url = Dashboard::getTabUrl(__FILE__);
 
-include '../phplib/template.php';
+include 'phplib/template.php';
