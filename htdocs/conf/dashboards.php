@@ -10,38 +10,37 @@ class Local_Dashboard {
      * external sites too! Want to add a link to the Hadoop DFS page? Easy!
      */
 
-    public static $DB_TABS = array(
+    public static $STUFF_TABS = array(
         'cacti' => 'testtab.php',
         'graphite' => 'testgraphite.php',
     ); 
 
-
     public static $DB_TABS = array(
-        'PGBouncer' => '/example_pgbouncer.php',
-        'PostgreSQL Queries' => '/example_postgresql_queries.php',
+        'PGBouncer' => 'tabs/example_pgbouncer.php',
+        'PostgreSQL Queries' => 'tabs/example_postgresql_queries.php',
     );
 
     public static $DEPLOY_TABS = array(
-        'FITB' => '/example_fitb.php',
-        'New Relic' => '/example_newrelic.php',
+        'FITB' => 'tabs/example_fitb.php',
+        'New Relic' => 'tabs/example_newrelic.php',
     );
 
     public static $HADOOP_TABS = array(
-        'Overview' => '/example_hadoop/overview.php',
-        'DFS' => '/example_hadoop/dfs.php',
-        'Jobs' => '/example_hadoop/jobs.php',
-        'Java Process Metrics' => '/example_hadoop/java_process.php',
-        'HBase' => '/example_hadoop/hbase.php',
+        'Overview' => 'tabs/example_hadoop/overview.php',
+        'DFS' => 'tabs/example_hadoop/dfs.php',
+        'Jobs' => 'tabs/example_hadoop/jobs.php',
+        'Java Process Metrics' => 'tabs/example_hadoop/java_process.php',
+        'HBase' => 'tabs/example_hadoop/hbase.php',
     );
 
     public static $NETWORK_TABS = array(
-        'FITB' => '/example_fitb.php',
-        'Netstat' => '/example_netstat.php',
-        'Mem info' => '/example_meminfo.php',
+        'FITB' => 'tabs/example_fitb.php',
+        'Netstat' => 'tabs/example_netstat.php',
+        'Mem info' => 'tabs/example_meminfo.php',
     );
 
     public static $TIME_TABS = array(
-        'Time' => '/example_time.php',
+        'Time' => 'tabs/example_time.php',
     );
 
 }
