@@ -18,17 +18,10 @@
     <?php endif; ?>
 
     <?php if (isset($jquery_version)) : ?>
-<<<<<<< HEAD
     <script type="text/javascript" src="assets/js/jquery-<?= $jquery_version ?>.js"></script>
     <?php else : ?>
     <script type="text/javascript" src="assets/js/jquery-1.6.2.min.js"></script>
     <?php endif; ?>
-=======
-    <script type="text/javascript" src="assets/js/jquery-<?= $jquery_version ?>.js"></script>
-    <? else : ?>
-    <script type="text/javascript" src="assets/js/jquery-1.6.2.min.js"></script>
-    <? endif; ?>
->>>>>>> p/makeerehomeable
 
     <?php if (isset($page_js_imports)) : ?>
         <?php foreach (array_unique($page_js_imports) as $page_js_import) : ?>
