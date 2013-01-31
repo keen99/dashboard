@@ -11,8 +11,8 @@ class Local_Dashboard {
      */
 
     public static $STUFF_TABS = array(
-        'cacti' => 'tabs/testtab.php',
-        'graphite' => 'tabs/testgraphite.php',
+        'cacti' => 'testtab.php',
+        'graphite' => 'testgraphite.php',
     ); 
 
     public static $DB_TABS = array(
