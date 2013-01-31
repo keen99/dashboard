@@ -11,10 +11,12 @@ $namespace = 'chef';
 
 
 
-
 $data = json_decode(file_get_contents("http://$graphite_server/metrics/index.json"));
 //$matches = preg_grep("/.*kiwi.*rpc.*count.counters.*/", $data);
 //$matches = preg_grep("/.*kiwi-app00.*rpc\.batch\.count\.counters.*/", $data);
+
+
+
 $matches = preg_grep("/.*kiwi-app.*rpc\.batch\.count\.counters.count/", $data);
 
 //$pattern="/.*kiwi-app00.*rpc\.batch\.count\.counters.count/";
@@ -37,7 +39,7 @@ foreach ($matches as $key => $value) {
 }  
 
 //print_r($matches);
-echo "<br>";
+//echo "<br>";
 echo "</pre>";
 
 //exit;
@@ -75,18 +77,35 @@ $hostpattern="/statsd\.(.*)\.rpc.*/";
 preg_match($hostpattern, $value, $host);
 //echo "in here for $value and $i - $host[1] - $graphtitle[1]<br>";
 
-
-	$graphs["$host[1] $graphtitle[1]"] = array(
+// group graphs by host
+//	$graphs["$host[1] $graphtitle[1]"] = array(
+//        array(
+// group graphs by title
+	$graphs["$graphtitle[1]"]["$host[1]"] = 
         array(
             'type' => 'graphite',
-            'title' => "$graphtitle[1]",
-			'metrics' => array("cactiStyle(keepLastValue($value))"),
-			'show_legend' => 0,
-        ), 
+            'title' => "$host[1] - $graphtitle[1]",
+			'metrics' => array("cactiStyle(alias(keepLastValue($value), \"$graphtitle[1]\"))"),
+			'show_legend' => 1,
+			'show_html_legend' => 1,
+			'height' => '120',
+//			'width' => '200',
+//			'area_mode' => 'first',
+//			'line_mode' => 'connected',
+//			'line_mode' => 'slope',
+//			'line_mode' => 'staircase',
+//			'vtitle' => 'vtitle is not fun',
+//			'is_ajax' => 1,
+//			'is_pie_chart' => 1,
+//for group by host
+//        ), 
     );
   $i++;
 }
 
+echo "<pre>";
+//print_r($graphs);
+echo "</pre>";
 
 include 'phplib/template.php';
 exit;
