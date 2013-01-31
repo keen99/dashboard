@@ -4,7 +4,7 @@ require_once('dashboards.php');
 
 $sections = array(
     'My shtuf' => array(
-        'Stuff' => Dashboard::$STUFF_TABS,
+        'Stuff' => Local_Dashboard::$STUFF_TABS,
     ),
 
     'Application' => array(
