@@ -5,9 +5,47 @@ require_once 'phplib/Dashboard.php';
 $title = 'yo graphite';
 
 /** a short alphanumeric string (used for CSS) */
-$namespace = 'chef';
+//$namespace = 'chef';
 
 
+$COLORS = array(
+        'green' ,		
+        'yellow' ,			
+        'cadet-blue' 		,
+        'orange' 			,
+//        'purple' 			,
+        'gray' 				 ,
+        'olive' 			,
+        'light-blue' 		,
+        'medium-spring-green', 
+        'medium-purple' 	,
+        'fire-brick' 		,
+        'cornflower-blue' 	,
+        'light-purple' 		,
+ //       'dark-green' 		,
+//      'dark-red' 			,
+//        'dark-olive-green' 	,
+        'deep-pink' 		,
+        'light-salmon' 		,
+        'lime-green' 		,
+        'brown' 			,
+        'pale-green' 		,
+        'orange-red' 		,
+      'pink' 				 ,
+      'plum' 				 ,
+        'wheat' 			,
+        'tan' 				 ,
+        'thistle' 			,
+        'rosy-brown' 		,
+//        'midnight-blue' 	,
+//      'blue' 				 ,
+        'red' 				 ,
+        'pink' 				 ,
+//        'black' 			,
+        'yellow-green' 		,
+        'lightsteelblue' 	,
+        'steelblue' 		,
+    );
 
 
 
@@ -15,19 +53,47 @@ $data = json_decode(file_get_contents("http://$graphite_server/metrics/index.jso
 //$matches = preg_grep("/.*kiwi.*rpc.*count.counters.*/", $data);
 //$matches = preg_grep("/.*kiwi-app00.*rpc\.batch\.count\.counters.*/", $data);
 
+//what hosts and rpcs do we have
+$allhosts = array();
+$allrpcs = array();
+$i=0;
+$y=0;
+foreach ( $data as $key => $value ) {
+	preg_match("/statsd\.(.*)\.kiwi.*\.(rpc.*)\.count\.counter.*/", $value, $match);
 
+	if ( isset($match[1]) ) {
+		$allhosts[$i] = $match[1];
+		$i++;
+	}
+	if ( isset($match[2]) ) {
+		$allrpcs[$y] = $match[2];
+		$y++;
+	}
+}
+$allhosts = array_unique($allhosts);
+$allrpcs = array_unique($allrpcs);
 
-$matches = preg_grep("/.*kiwi-app.*rpc\.batch\.count\.counters.count/", $data);
-
-//$pattern="/.*kiwi-app00.*rpc\.batch\.count\.counters.count/";
-
-
-echo "we are here<br>";
 echo "<pre>";
+//print_r($data);
+//print_r($allhosts);
+//print_r($allrpcs);
+
+
+foreach ( $allrpcs as $key => $value) {
+
+//echo "doing $value<hr>";
+
+//$matches = preg_grep("/.*kiwi-app.*rpc\.batch\.count\.counters.count/", $data);
+$matches = preg_grep("/.*$value\.count\.counters.count/", $data);
+
+
+//echo "we are here<br>";
+//echo "<pre>";
 //print_r($data);
 //print_r($matches);
 
 
+//exit;
 //now restructure to support how we want to graph it
 //reorder keys to be 0++ as required
 $i = 0;
@@ -65,7 +131,8 @@ statsd.live-kiwi-app*.kiwi.9000.rpc.auction.bid.errors.counters.count))
 
 /** sections and graphs to be shown on the page */
 
-$graphs = array();
+if (! isset($graphs))
+ $graphs = array();
 $i = 0;
 foreach ($matches as $value) {
 //echo "in here for $value and $i<br>";
@@ -77,6 +144,13 @@ $hostpattern="/statsd\.(.*)\.rpc.*/";
 preg_match($hostpattern, $value, $host);
 //echo "in here for $value and $i - $host[1] - $graphtitle[1]<br>";
 
+
+if (! isset($colorid) )
+  $colorid = 0;
+
+if ( $colorid > count($COLORS)-1 )
+ $colorid = 0;
+
 // group graphs by host
 //	$graphs["$host[1] $graphtitle[1]"] = array(
 //        array(
@@ -84,11 +158,13 @@ preg_match($hostpattern, $value, $host);
 	$graphs["$graphtitle[1]"]["$host[1]"] = 
         array(
             'type' => 'graphite',
-            'title' => "$host[1] - $graphtitle[1]",
+//            'title' => "$host[1] - $graphtitle[1]",
+            'title' => "$host[1] - $COLORS[$colorid]",
 			'metrics' => array("cactiStyle(alias(keepLastValue($value), \"$graphtitle[1]\"))"),
 			'show_legend' => 1,
 			'show_html_legend' => 1,
 			'height' => '120',
+			'color' => $COLORS[$colorid],
 //			'width' => '200',
 //			'area_mode' => 'first',
 //			'line_mode' => 'connected',
@@ -100,12 +176,15 @@ preg_match($hostpattern, $value, $host);
 //for group by host
 //        ), 
     );
+  $colorid++;
   $i++;
 }
 
 echo "<pre>";
 //print_r($graphs);
 echo "</pre>";
+
+}
 
 include 'phplib/template.php';
 exit;
