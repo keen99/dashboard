@@ -3,11 +3,11 @@ require_once('phplib/Dashboard.php');
 require_once('conf/dashboards.php');
 
 $sections = array(
-/*
+
     'My shtuf' => array(
         'Stuff' => Local_Dashboard::$STUFF_TABS,
     ),
-*/
+
     'Application' => array(
         'Deploy' => Local_Dashboard::$DEPLOY_TABS,
     ),
