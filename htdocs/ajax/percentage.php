@@ -1,6 +1,6 @@
 <?php
 
-require_once('../phplib/Dashboard.php');
+require_once('phplib/Dashboard.php');
 
 $from = isset($_GET['from']) ? $_GET['from'] : '';
 $max = isset($_GET['max']) ? (float)$_GET['max'] : null;

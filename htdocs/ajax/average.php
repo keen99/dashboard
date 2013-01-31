@@ -1,6 +1,6 @@
 <?php
 
-require_once('../phplib/Dashboard.php');
+require_once('phplib/Dashboard.php');
 
 $from = isset($_GET['from']) ? $_GET['from'] : '';
 
