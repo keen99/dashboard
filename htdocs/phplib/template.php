@@ -5,10 +5,10 @@
 <html>
 <head>
     <title><?= $title ?></title>
-    <link rel="stylesheet" type="text/css" href="/assets/css/screen.css">
+    <link rel="stylesheet" type="text/css" href="assets/css/screen.css">
 
     <?php if (isset($_GET['black'])) : ?>
-    <link rel="stylesheet" type="text/css" href="/assets/css/screen-black.css">
+    <link rel="stylesheet" type="text/css" href="assets/css/screen-black.css">
     <?php endif; ?>
 
     <?php if (isset($page_css_imports)) : ?>
@@ -18,10 +18,17 @@
     <?php endif; ?>
 
     <?php if (isset($jquery_version)) : ?>
-    <script type="text/javascript" src="/assets/js/jquery-<?= $jquery_version ?>.js"></script>
+<<<<<<< HEAD
+    <script type="text/javascript" src="assets/js/jquery-<?= $jquery_version ?>.js"></script>
     <?php else : ?>
-    <script type="text/javascript" src="/assets/js/jquery-1.6.2.min.js"></script>
+    <script type="text/javascript" src="assets/js/jquery-1.6.2.min.js"></script>
     <?php endif; ?>
+=======
+    <script type="text/javascript" src="assets/js/jquery-<?= $jquery_version ?>.js"></script>
+    <? else : ?>
+    <script type="text/javascript" src="assets/js/jquery-1.6.2.min.js"></script>
+    <? endif; ?>
+>>>>>>> p/makeerehomeable
 
     <?php if (isset($page_js_imports)) : ?>
         <?php foreach (array_unique($page_js_imports) as $page_js_import) : ?>
@@ -43,7 +50,7 @@
         echo "\n";
     }
     ?>
-    <script type="text/javascript" src="/assets/js/dashboard.js"></script>
+    <script type="text/javascript" src="assets/js/dashboard.js"></script>
 </head>
 <body id="<?= $namespace ?>" class="dashboard">
 <div id="status"></div>
