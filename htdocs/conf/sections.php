@@ -1,6 +1,6 @@
 <?php
 require_once('phplib/Dashboard.php');
-require_once('dashboards.php');
+require_once('conf/dashboards.php');
 
 $sections = array(
     'My shtuf' => array(
