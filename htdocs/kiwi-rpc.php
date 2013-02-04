@@ -11,38 +11,38 @@ $namespace="";
 
 addGraphTemplate(
 	"kiwirpcs", 
-	"kiwi rpcs", 
+	"kiwi rpc counts", 
 	"(^statsd)",
 	"(.*.*)\.kiwi",
 	"(rpc.*)",
 	"(count\.counters\.count)"
 );
 
-//meh...
 addGraphTemplate(
-	"kiwitest", 
-	"kiwi rpcs", 
+	"kiwirpcsduration", 
+	"kiwi rpc duration avg", 
 	"(^statsd)",
 	"(.*.*)\.kiwi",
-	"(rpc\.auction.*)",
-	"(count\.counters\.count)",
-	array("keepLastValue(statsd.live-kiwi-app*.kiwi.*.rpc.auction.bid.count.counters.count)")
+	"(rpc.*)",
+	"(duration\.avg\.counters\.count)"
 );
 
 //createGraphsFromTemplatesAggregate("kiwirpcs", "host");
-//createGraphsFromTemplatesAggregateShort("kiwirpcs", "host");
+//createGraphsFromTemplatesAggregate("kiwirpcs", "service");
 
 //createGraphsFromTemplatesAggregate("kiwirpcs", "service");
-//createGraphsFromTemplatesAggregateShort("kiwirpcs", "service");
+createGraphsFromTemplatesAggregate("kiwirpcsduration", "service");
+//createGraphsFromTemplatesAggregate("kiwirpcsduration", "host");
+
 
 //createGraphsFromTemplates("kiwirpcs", "host");
-createGraphsFromTemplates("kiwirpcs", "service");
+//createGraphsFromTemplates("kiwirpcs", "service");
 
 //createGraphsFromTemplates("kiwitest");
 
 
 
  printTimer('pre template');
-
+exit;
 /** actually draws the page */
 include 'phplib/template.php';

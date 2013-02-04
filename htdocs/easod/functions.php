@@ -64,6 +64,9 @@ function printTimer($prefix='Timer') {
   $endtime = $mtime; 
   $totaltime = ($endtime - $starttime); 
   echo $prefix . ' Elapsed time: ' .$totaltime. ' seconds<br>';
+  flush();
+  ob_flush();
+
 }
 
 function fetchGraphiteData() {
@@ -201,8 +204,7 @@ function createGraphsFromTemplates($name, $groupby="service") {
 
 
 //// half implemented logic for searching for data...
-function MagicData() {
-	
+function filterData($data,$prefixpattern,$hostpattern,$servicepattern,$suffixpattern,$filter="all") {
 		$p=0;
 		$h=0;
 		$s=0;
@@ -240,6 +242,17 @@ function MagicData() {
 			echo "sorry, our pattern matching failed. missing hosts/services/prefixes/suffixes.. graphtemplate $name";
 			return 1;
 		}	
+
+		if ( "$filter" === "all" ) {
+ 			return array($allhosts,$allservices,$allprefixes,$allsuffixes);
+		} elseif ("$filter" === "host" ) {
+			return $allhosts;
+		} elseif ("$filter" === "service" ) {
+			return $allservices;
+		} else {
+			echo "filter failure, can't filter on $filter<br>";
+			return 1;
+		}
 	
 }
 
@@ -253,6 +266,7 @@ function MagicData() {
 function createGraphsFromTemplatesAggregate($name, $groupby="service") {
 	global $graphTemplate, $COLORS, $graphs; 
 
+$g=1;
 
 	if (! is_array($graphTemplate["$name"]) ) {
 		echo "sorry, can't find graph template named $name<br>";
@@ -268,26 +282,38 @@ printTimer('postFetch');
 		$servicepattern=$graphTemplate["$name"]['servicepattern'];
 		$suffixpattern=$graphTemplate["$name"]['suffixpattern'];
 	
-	
-	
-		$p=0;
-		$h=0;
-		$s=0;
-		$ss=0;
 
-
-			$matches = preg_grep("/$prefixpattern\.$hostpattern.*\.$servicepattern\.$suffixpattern/", $data);
-			$matches = array_unique($matches);
-			
+			//find our list of hosts or services
+			$loopdata=filterData($data,$prefixpattern,$hostpattern,$servicepattern,$suffixpattern,$groupby);
+//echo "looper count " . count($loopdata) . "<hr>";
+		foreach ($loopdata as $loop) {
+		
 			if (! isset($graphs) )
 			 $graphs = array();
 		
+			$metrics = array();
 			$i = 0;
-			//for each 
+	
+			if ( $groupby === "host" ) {
+				$matches = preg_grep("/$prefixpattern\.$loop.*\.$servicepattern\.$suffixpattern/", $data);
+			} elseif ( $groupby === "service" ) { 
+				$matches = preg_grep("/$prefixpattern\.$hostpattern.*\.$loop\.$suffixpattern/", $data);				
+			} else {
+				echo "unknown groupby $groupby";
+				return 1;
+			}
+//printTimer('in that loop');
+
+			$matches = array_unique($matches);
+			
+//half second each! FIX ME!
+printTimer('this loop');
+echo "matches count " . count($matches) . "<hr>";
+
 			foreach ($matches as $value) {
 				
 				//		echo "in here for $value and $i<br>";
-				unset($graphdata);
+//				unset($graphdata);
 				preg_match("/$prefixpattern\.$hostpattern.*\.$servicepattern\.$suffixpattern/", $value, $graphdata);
 //echo "<pre>";
 //print_r($graphdata);
@@ -299,32 +325,45 @@ printTimer('postFetch');
 				$graphhost=$graphdata[2];
 				$graphservice=$graphdata[3];
 				$graphsuffix=$graphdata[4];
-
-
-
-
+//echo "loop $loop<br>";
+//echo "add metric[$i] $value<br>";
+				$metrics[$i] = "cactiStyle(alias(keepLastValue($value), \"$graphservice\"))";
 
 				if (! isset($colorid) )
-				  $colorid = 0;
-				
+//				  $colorid = 0;
+					$colorid = rand(0, count($COLORS)-1);				
 				if ( $colorid > count($COLORS)-1 )
-				 $colorid = 0;					
+//					$colorid = 0;					
+					$colorid = rand(0, count($COLORS)-1);				
 
-				if ( is_array($graphTemplate["$name"]["metrics"]) ) {
-					$metrics = $graphTemplate["$name"]["metrics"];
-				} else {
-					$metrics = array("cactiStyle(alias(keepLastValue($value), \"$graphservice\"))");
-				}
+//					$colorid = rand(0, count($COLORS)-1);				
+//echo "color id $colorid<br>";
+				$colors[$i] = $COLORS[$colorid];
+				$colorid++;
+				$i++;
+
+			}
+
+			if ( $groupby === "host" ) {
+				$graphtitle = $graphTemplate["$name"]['sectiontitle'] . " - $graphhost (" . count($metrics) . ")" ;
+			} elseif ( $groupby === "service" ) { 
+				$graphtitle = $graphTemplate["$name"]['sectiontitle'] . " - $graphservice (" . count($metrics) . ")";
+			} else {
+				echo "unknown groupby $groupby";
+				return 1;
+			}
+				
+
 				$newgraph = 
 					array(
 						'type' => 'graphite',
-			            'title' => "$graphhost - $graphservice",
+			            'title' => $graphtitle,
 						'metrics' => $metrics, 
 						'show_legend' => 0,
 						'show_html_legend' => 1,
 						'show_copy_url' => 0,
 						'height' => '120',
-						'color' => $COLORS[$colorid],
+//						'color' => $colors,
 			//			'width' => '200',
 			//			'area_mode' => 'first',
 			//			'line_mode' => 'connected',
@@ -334,26 +373,29 @@ printTimer('postFetch');
 			//			'is_ajax' => 1,
 			//			'is_pie_chart' => 1,
 				);
+//echo "setting graph array: graphs [$graphhost] [$graphservice] " . $g++ . "<br>";
 
 				if ( "$groupby" == "host" ) {
-					$graphs["$graphhost"]["$graphservice"] = $newgraph;
+//					$graphs["$graphhost"]["$graphservice"] = $newgraph;
+					$graphs[$graphTemplate["$name"]['sectiontitle']]["$graphhost"] = $newgraph;
+
 				} elseif ( "$groupby" == "service" ) {
-					$graphs["$graphservice"]["$graphhost"] = $newgraph;
+//					$graphs["$graphservice"]["$graphhost"] = $newgraph;
+					$graphs[$graphTemplate["$name"]['sectiontitle']]["$graphservice"] = $newgraph;
 				} else { 
 					echo "unknown groupby for this graph template - $name";
 					return 1;
 				}
 
-				$colorid++;
-				$i++;
-			}
+
+		} //foreach loopdata		
 printTimer('postServices');
 	}
-	/*
+/*
 	echo "<pre>";
 	print_r($graphs);
 	echo "</pre>";
-	*/
+*/
 
 	echo "<hr>graph count: " . count($graphs) . "<hr><br>";
 
