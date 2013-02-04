@@ -200,6 +200,51 @@ function createGraphsFromTemplates($name, $groupby="service") {
 
 
 
+//// half implemented logic for searching for data...
+function MagicData() {
+	
+		$p=0;
+		$h=0;
+		$s=0;
+		$ss=0;
+		foreach ( $data as $key => $value ) {
+			preg_match("/$prefixpattern\.$hostpattern.*\.$servicepattern\.$suffixpattern/", $value, $match);
+		
+		//print_r($match);
+		//exit;
+		
+			if ( isset($match[1]) ) {
+				$allprefixes[$p] = $match[1];
+				$p++;
+			}
+				if ( isset($match[2]) ) {
+				$allhosts[$h] = $match[2];
+				$h++;
+			}
+		
+			if ( isset($match[3]) ) {
+				$allservices[$s] = $match[3];
+				$s++;
+			}
+			if ( isset($match[4]) ) {
+				$allsuffixes[$ss] = $match[4];
+				$ss++;
+			}
+		}
+		if ( isset($allhosts) && isset($allservices)  && isset($allprefixes) && isset($allsuffixes) ) {
+			$allhosts = array_unique($allhosts);
+			$allservices = array_unique($allservices);
+			$allprefixes = array_unique($allprefixes);
+			$allsuffixes = array_unique($allsuffixes);
+		} else {
+			echo "sorry, our pattern matching failed. missing hosts/services/prefixes/suffixes.. graphtemplate $name";
+			return 1;
+		}	
+	
+}
+
+////
+
 
 
 
