@@ -44,17 +44,18 @@ $graphTemplate['test template bypass'] = array(
 		'hostpattern' => '(.*app.*)\.kiwi',	
 //		'servicepattern' => '(rpc\..*)',
 		'servicepattern' => '(rpc\..*errors|rpc\..*count)',
-		'suffixpattern' => '(counters\.count)',
+//		'servicepattern' => '(rpc\.blaze\.post\..*)',
+		'suffixpattern' => '(counters\.count)'
 
-		'xpattern' => '(rpc\..*\.count)',		
-		'ypattern' => '(rpc\..*\.errors)'
-//		,'servicepattern' => '(rpc\.blaze\.post)'	
-//		,'xpattern' => '(rpc\.blaze\.post\.count)	
-//		,'ypattern' => '(rpc\.blaze\.post\.errors)'	
+//		,'firstypattern' => '(rpc\..*\.count)'
+//		,'secondypattern' => '(rpc\..*\.errors)'
+//		,'servicepattern' => '(rpc\.blaze\..*)'	
+//		,'firstypattern' => '(rpc\.blaze\.post\.count)	
+//		,'secondypattern' => '(rpc\.blaze\.post\.errors)'	
 //		,'suffixpattern' => '([e,c].*\.counters\.count)'
 
-
-//		,'grouping' => 'series'
+// create a sumSeries for each y axis
+//		,'sumgraphs' => 'series'
 		
 );
 
@@ -75,8 +76,8 @@ $graphTemplate['test template bypass2'] = array(
 		'prefixpattern' => '(^statsd)',
 		'hostpattern' => '(.*app00)\.kiwi',	
 		'servicepattern' => '(rpc\..*blaze.*\.[errors,count]\.counters)',		
-//		'xpattern' => '(rpc\.blaze\.post\.count)',		
-//		'ypattern' => '(rpc\.blaze\.post\.errors)',		
+//		'firstypattern' => '(rpc\.blaze\.post\.count)',		
+//		'secondypattern' => '(rpc\.blaze\.post\.errors)',		
 		'suffixpattern' => '(counters\.count)'
 );
 //createGraphsFromTemplatesAggregate("test template bypass2", "service");

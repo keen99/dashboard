@@ -299,15 +299,19 @@ printTimer('postFetch');
 		$hostpattern=$graphTemplate["$name"]['hostpattern'];
 		$servicepattern=$graphTemplate["$name"]['servicepattern'];
 
-
-		$ypattern = isset($graphTemplate["$name"]['ypattern']) ? $graphTemplate["$name"]['ypattern']:"";
-		$xpattern = isset($graphTemplate["$name"]['xpattern']) ? $graphTemplate["$name"]['xpattern']:"";
+		// these two allow to to split $servicepattern matches and place them on 
+		// the two Y axis
+		$firstypattern = isset($graphTemplate["$name"]['firstypattern']) ? $graphTemplate["$name"]['firstypattern']:$servicepattern=$graphTemplate["$name"]['servicepattern'];
+		$secondypattern = isset($graphTemplate["$name"]['secondypattern']) ? $graphTemplate["$name"]['secondypattern']:"";
 
 		$suffixpattern=$graphTemplate["$name"]['suffixpattern'];
 
 		$sectiontitle=$graphTemplate["$name"]['sectiontitle'];
 
-		$grouping = isset($graphTemplate["$name"]['grouping']) ? $graphTemplate["$name"]['grouping']:"";
+
+		//with this set to anything, we create a series list of the matching metrics for each y axis
+		//then sumSeries that list
+		$sumgraphs = isset($graphTemplate["$name"]['sumgraphs']) ? $graphTemplate["$name"]['sumgraphs']:false;
 
 
 		if (! isset($graphs) )
@@ -353,6 +357,9 @@ echo "$value<br>";
 print_r($graphdata);
 echo "</pre>";
 */
+
+
+
 	
 
 
@@ -365,9 +372,17 @@ echo "</pre>";
 					$graphservice=$graphdata[3];
 					$graphsuffix=$graphdata[4];
 
+					if ( $groupby === "host" ) {
+						$graphalias = $graphhost;
+					} elseif ( $groupby === "service" ) { 
+						$graphalias = $graphservice;
+					} else {
+						echo "unknown groupby $groupby";
+						return 1;
+					}
 
-					if ( !empty($grouping) ) {
-						if ( !empty($ypattern) && preg_match("/.*$ypattern.*/", $value) ) {
+					if ( !empty($sumgraphs) ) {
+						if ( !empty($secondypattern) && preg_match("/.*$secondypattern.*/", $value) ) {
 							if (! empty($yseries) ) 
 							 $yseries .= ",";
 						 $yseries .= "keepLastValue(" . $value . ")";
@@ -377,12 +392,12 @@ echo "</pre>";
 						 $series .= "keepLastValue(" . $value . ")";
 						}
 					} else { 
-						if ( !empty($ypattern) && preg_match("/.*$ypattern.*/", $value) ) {
+						if ( !empty($secondypattern) && preg_match("/.*$secondypattern.*/", $value) ) {
 	
-							$metrics[$i] = "cactiStyle(alias(secondYAxis(stacked($value)), \"$graphservice\"))";
+							$metrics[$i] = "cactiStyle(alias(secondYAxis(stacked($value)), \"$graphalias\"))";
 			
 						} else {
-							$metrics[$i] = "cactiStyle(alias(keepLastValue($value), \"$graphservice\"))";
+							$metrics[$i] = "cactiStyle(alias(keepLastValue($value), \"$graphalias\"))";
 						
 						}
 					}
@@ -403,37 +418,57 @@ echo "</pre>";
 				} //end foreach matches
 
 
-					if ( !empty($grouping) ) {
-
-							$metrics[0] = "cactiStyle(alias(sumSeries($series), \"$graphservice\"))";
-
-						if ( !empty($ypattern) ) {
-	
-							$metrics[1] = "cactiStyle(alias(secondYAxis(stacked(sumSeries($yseries))), \"$graphservice\"))";
-
-			
-						}
-						
-					}
-
-
-
 				if ( $groupby === "host" ) {
-					$graphtitle = $sectiontitle . " - $graphhost (" . count($metrics) . ")" ;
+					$graphtitle = $sectiontitle . " - $graphhost";
 				} elseif ( $groupby === "service" ) { 
-					$graphtitle = $sectiontitle . " - $graphservice (" . count($metrics) . ")";
+					$graphtitle = $sectiontitle . " - $graphservice";
 				} else {
 					echo "unknown groupby $groupby";
 					return 1;
 				}
-				
+
+
+				if ( !empty($sumgraphs) ) {
+
+					//backwards on purpose!
+					if ( $groupby === "host" ) {
+						$graphtitle = $sectiontitle . " - $graphservice";
+					} elseif ( $groupby === "service" ) { 
+						$graphtitle = $sectiontitle . " - $graphhost";
+					} else {
+						echo "unknown groupby $groupby";
+						return 1;
+					}
+			
+
+					if ( !empty($series) ) {
+						$whatmetric = count($metrics); //because the count starts at 0, this returns the next vue.
+						$metrics[$whatmetric] = "cactiStyle(alias(sumSeries($series), \"$graphalias\"))";
+					}
+//we should probably hide the first axis, or only put the second on the second if there wasn't a first...
+					if ( !empty($yseries) ) {
+						$whatmetric = count($metrics); //because the count starts at 0, this returns the next vue.
+						$metrics[$whatmetric] = "cactiStyle(alias(secondYAxis(stacked(sumSeries($yseries))), \"$graphalias\"))";
+
+					}
+					
+				}
+
+
+				$graphtitle = $graphtitle . " (" . count($metrics) . ")";
+
+				if ( count($metrics) > 4 ) {
+					$showlegend=0;
+				} else {
+					$showlegend=1;
+				}
 
 				$newgraph = 
 					array(
 						'type' => 'graphite',
 			            'title' => $graphtitle,
 						'metrics' => $metrics, 
-						'show_legend' => 0,
+						'show_legend' => $showlegend,
 						'show_html_legend' => 1,
 						'show_copy_url' => 0,
 //						'height' => '120',
@@ -449,12 +484,12 @@ echo "</pre>";
 				);
 //echo "setting graph array: graphs [$graphhost] [$graphservice] " . $g++ . "<br>";
 
+
+				// this sets up the graph array - we group on-page by the first arg, and display the second arg
 				if ( "$groupby" == "host" ) {
-//					$graphs["$graphhost"]["$graphservice"] = $newgraph;
 					$graphs["$sectiontitle($groupby)"]["$graphhost"] = $newgraph;
 
 				} elseif ( "$groupby" == "service" ) {
-//					$graphs["$graphservice"]["$graphhost"] = $newgraph;
 					$graphs["$sectiontitle($groupby)"]["$graphservice"] = $newgraph;
 				} else { 
 					echo "unknown groupby for this graph template - $name";
