@@ -138,6 +138,7 @@ function createGraphsFromTemplates($name, $groupby="service") {
 		 $graphs = array();
 	
 		$i = 0;
+		//for each line that matches our full pattern set
 		foreach ($matches as $value) {
 			
 			//		echo "in here for $value and $i<br>";
@@ -154,21 +155,21 @@ function createGraphsFromTemplates($name, $groupby="service") {
 			$graphservice=$graphdata[3];
 			$graphsuffix=$graphdata[4];
 
-
-
-
-
+/*
+echo "<pre>";
+echo "/$prefixpattern\.$hostpattern.*\.$servicepattern\.$suffixpattern/<br>";
+print_r($graphdata);
+echo "</pre>";
+*/
 			if (! isset($colorid) )
 			  $colorid = 0;
 			
 			if ( $colorid > count($COLORS)-1 )
 			 $colorid = 0;					
 
-			if ( is_array($graphTemplate["$name"]["metrics"]) ) {
-				$metrics = $graphTemplate["$name"]["metrics"];
-			} else {
-				$metrics = array("cactiStyle(alias(keepLastValue($value), \"$graphservice\"))");
-			}
+
+			$metrics = array("cactiStyle(alias(keepLastValue($value), \"$graphservice\"))");
+
 			$newgraph = 
 				array(
 					'type' => 'graphite',
@@ -202,6 +203,12 @@ function createGraphsFromTemplates($name, $groupby="service") {
 			$i++;
 		}
 	}
+
+	printTimer('doneGraphs');
+	echo "<hr>graph count: " . count($graphs) . " - groupby $groupby<hr><br>";
+	
+
+
 	/*
 	echo "<pre>";
 	print_r($graphs);
@@ -262,7 +269,8 @@ function filterData($data,$prefixpattern,$hostpattern,$servicepattern,$suffixpat
 			echo "filter failure, can't filter on $filter<br>";
 			return 1;
 		}
-	
+
+
 }
 
 ////
@@ -277,6 +285,7 @@ function createGraphsFromTemplatesAggregate($name, $groupby="service") {
 
 $g=1;
 
+
 	if (! is_array($graphTemplate["$name"]) ) {
 		echo "sorry, can't find graph template named $name<br>";
 		exit;
@@ -289,9 +298,17 @@ printTimer('postFetch');
 		$prefixpattern=$graphTemplate["$name"]['prefixpattern'];
 		$hostpattern=$graphTemplate["$name"]['hostpattern'];
 		$servicepattern=$graphTemplate["$name"]['servicepattern'];
+
+
+		$ypattern = isset($graphTemplate["$name"]['ypattern']) ? $graphTemplate["$name"]['ypattern']:"";
+		$xpattern = isset($graphTemplate["$name"]['xpattern']) ? $graphTemplate["$name"]['xpattern']:"";
+
 		$suffixpattern=$graphTemplate["$name"]['suffixpattern'];
 
 		$sectiontitle=$graphTemplate["$name"]['sectiontitle'];
+
+		$grouping = isset($graphTemplate["$name"]['grouping']) ? $graphTemplate["$name"]['grouping']:"";
+
 
 		if (! isset($graphs) )
 			$graphs = array();	
@@ -306,6 +323,8 @@ printTimer('postFetch');
 		// loop across list of services or hosts
 		foreach ($groupdata as $groupid) {
 			
+			$series="";
+			$yseries="";
 			$metrics = array();
 			$i = 0;
 	
@@ -334,6 +353,9 @@ echo "$value<br>";
 print_r($graphdata);
 echo "</pre>";
 */
+	
+
+
 					if (! isset($graphdata[0]) ) {
 						echo "we failed to set graphdata, what happened...value $value<br>";
 					}
@@ -343,7 +365,28 @@ echo "</pre>";
 					$graphservice=$graphdata[3];
 					$graphsuffix=$graphdata[4];
 
-					$metrics[$i] = "cactiStyle(alias(keepLastValue($value), \"$graphservice\"))";
+
+					if ( !empty($grouping) ) {
+						if ( !empty($ypattern) && preg_match("/.*$ypattern.*/", $value) ) {
+							if (! empty($yseries) ) 
+							 $yseries .= ",";
+						 $yseries .= "keepLastValue(" . $value . ")";
+						} else {
+							if (! empty($series) ) 
+							 $series .= ",";
+						 $series .= "keepLastValue(" . $value . ")";
+						}
+					} else { 
+						if ( !empty($ypattern) && preg_match("/.*$ypattern.*/", $value) ) {
+	
+							$metrics[$i] = "cactiStyle(alias(secondYAxis(stacked($value)), \"$graphservice\"))";
+			
+						} else {
+							$metrics[$i] = "cactiStyle(alias(keepLastValue($value), \"$graphservice\"))";
+						
+						}
+					}
+
 
 					if (! isset($colorid) )
 					//	$colorid = 0;
@@ -358,7 +401,22 @@ echo "</pre>";
 					$i++;
 
 				} //end foreach matches
+
+
+					if ( !empty($grouping) ) {
+
+							$metrics[0] = "cactiStyle(alias(sumSeries($series), \"$graphservice\"))";
+
+						if ( !empty($ypattern) ) {
+	
+							$metrics[1] = "cactiStyle(alias(secondYAxis(stacked(sumSeries($yseries))), \"$graphservice\"))";
+
 			
+						}
+						
+					}
+
+
 
 				if ( $groupby === "host" ) {
 					$graphtitle = $sectiontitle . " - $graphhost (" . count($metrics) . ")" ;
@@ -378,7 +436,7 @@ echo "</pre>";
 						'show_legend' => 0,
 						'show_html_legend' => 1,
 						'show_copy_url' => 0,
-						'height' => '120',
+//						'height' => '120',
 //						'color' => $colors,
 			//			'width' => '200',
 			//			'area_mode' => 'first',
@@ -410,11 +468,12 @@ echo "</pre>";
 
 		} //foreach loopdata		
 	}
-/*
+
+
 	echo "<pre>";
 	print_r($graphs);
 	echo "</pre>";
-*/
+
 
 	printTimer('doneGraphs');
 	echo "<hr>graph count: " . count($graphs) . " - groupby $groupby<hr><br>";

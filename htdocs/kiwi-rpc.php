@@ -29,17 +29,6 @@ addGraphTemplate(
 
 
 
-$graphTemplate['test template bypass'] = array(
-		'type' => 'graphite',
-		'sectiontitle' => 'kiwi rpc test counters',
-		'prefixpattern' => '(^statsd)',
-		'hostpattern' => '(.*app0.*)\.kiwi',	
-		'servicepattern' => '(rpc\.blaze\.post\.[e,c].*)',		
-//		'xpattern' => '(rpc\.blaze\.post\.count)',		
-//		'ypattern' => '(rpc\.blaze\.post\.errors)',		
-		'suffixpattern' => '(counters\.count)'
-);
-
 //createGraphsFromTemplatesAggregate("kiwirpcs", "host");
 //createGraphsFromTemplatesAggregate("kiwirpcs", "service");
 
@@ -47,7 +36,51 @@ $graphTemplate['test template bypass'] = array(
 //createGraphsFromTemplatesAggregate("kiwirpcsduration", "service");
 //createGraphsFromTemplatesAggregate("kiwirpcsduration", "host");
 
+
+$graphTemplate['test template bypass'] = array(
+		'type' => 'graphite',
+		'sectiontitle' => 'kiwi rpc test counters',
+		'prefixpattern' => '(^statsd)',
+		'hostpattern' => '(.*app.*)\.kiwi',	
+//		'servicepattern' => '(rpc\..*)',
+		'servicepattern' => '(rpc\..*errors|rpc\..*count)',
+		'suffixpattern' => '(counters\.count)',
+
+		'xpattern' => '(rpc\..*\.count)',		
+		'ypattern' => '(rpc\..*\.errors)'
+//		,'servicepattern' => '(rpc\.blaze\.post)'	
+//		,'xpattern' => '(rpc\.blaze\.post\.count)	
+//		,'ypattern' => '(rpc\.blaze\.post\.errors)'	
+//		,'suffixpattern' => '([e,c].*\.counters\.count)'
+
+
+//		,'grouping' => 'series'
+		
+);
+
+
+
+
 createGraphsFromTemplatesAggregate("test template bypass", "service");
+//createGraphsFromTemplatesAggregate("test template bypass", "host");
+//createGraphsFromTemplates("test template bypass", "host");
+//createGraphsFromTemplates("test template bypass", "service");
+
+
+
+
+$graphTemplate['test template bypass2'] = array(
+		'type' => 'graphite',
+		'sectiontitle' => 'kiwi rpc test counters',
+		'prefixpattern' => '(^statsd)',
+		'hostpattern' => '(.*app00)\.kiwi',	
+		'servicepattern' => '(rpc\..*blaze.*\.[errors,count]\.counters)',		
+//		'xpattern' => '(rpc\.blaze\.post\.count)',		
+//		'ypattern' => '(rpc\.blaze\.post\.errors)',		
+		'suffixpattern' => '(counters\.count)'
+);
+//createGraphsFromTemplatesAggregate("test template bypass2", "service");
+
 
 
 
