@@ -27,12 +27,28 @@ addGraphTemplate(
 	"(duration\.avg\.counters\.count)"
 );
 
+
+
+$graphTemplate['test template bypass'] = array(
+		'type' => 'graphite',
+		'sectiontitle' => 'kiwi rpc test counters',
+		'prefixpattern' => '(^statsd)',
+		'hostpattern' => '(.*app0.*)\.kiwi',	
+		'servicepattern' => '(rpc\.blaze\.post\.[e,c].*)',		
+//		'xpattern' => '(rpc\.blaze\.post\.count)',		
+//		'ypattern' => '(rpc\.blaze\.post\.errors)',		
+		'suffixpattern' => '(counters\.count)'
+);
+
 //createGraphsFromTemplatesAggregate("kiwirpcs", "host");
 //createGraphsFromTemplatesAggregate("kiwirpcs", "service");
 
 //createGraphsFromTemplatesAggregate("kiwirpcs", "service");
-createGraphsFromTemplatesAggregate("kiwirpcsduration", "service");
+//createGraphsFromTemplatesAggregate("kiwirpcsduration", "service");
 //createGraphsFromTemplatesAggregate("kiwirpcsduration", "host");
+
+createGraphsFromTemplatesAggregate("test template bypass", "service");
+
 
 
 //createGraphsFromTemplates("kiwirpcs", "host");
@@ -43,6 +59,6 @@ createGraphsFromTemplatesAggregate("kiwirpcsduration", "service");
 
 
  printTimer('pre template');
-exit;
+//exit;
 /** actually draws the page */
 include 'phplib/template.php';
