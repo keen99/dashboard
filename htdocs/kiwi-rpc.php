@@ -69,8 +69,33 @@ $graphTemplate['test template bypass'] = array(
 //createGraphsFromTemplates("test template bypass", "service");
 
 //createGraphsFromTemplates("test template bypass", "service");
-createGraphsFromTemplatesHack("test template bypass", "service", false, false);
+
+//  group by service, each service and each host on it's own graph - err/count split
+//createGraphsFromTemplatesHack("test template bypass", "service", false, false);
+//  group by service, aggregate each service (all hosts) onto one graph
 //createGraphsFromTemplatesHack("test template bypass", "service", false, true);
+
+//  group by host, each service and each host on it's own graph
+//createGraphsFromTemplatesHack("test template bypass", "host", false, false);
+//  group by host, aggregate each host (all services) onto one graph
+//createGraphsFromTemplatesHack("test template bypass", "host", false, true);
+
+// now sum...
+//  group by service, each service and each host on it's own graph - err/count split
+// one line per service and per host - broken alias	
+createGraphsFromTemplatesHack("test template bypass", "service", true, false);
+//^same as but got both errrs and counts on the same graph...
+//createGraphsFromTemplatesHack("test template bypass", "service", false, false);
+//createGraphsFromTemplatesHack("test template bypass", "service", true, true);
+
+//  group by service, aggregate each service (all hosts) onto one graph
+//createGraphsFromTemplatesHack("test template bypass", "service", true, true);
+//  group by host, each service and each host on it's own graph
+//createGraphsFromTemplatesHack("test template bypass", "host", true, false);
+//  group by host, aggregate each host (all services) onto one graph
+//createGraphsFromTemplatesHack("test template bypass", "host", true, true);
+
+
 
 
 //createGraphsFromTemplates("test template bypass", "host");

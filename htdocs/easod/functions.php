@@ -637,7 +637,9 @@ echo "</pre>";
 
 function createGraphsFromTemplatesHack($name, $orderby="service", $sumgraphs=false,$aggregate=false) {
 	global $graphTemplate, $COLORS, $graphs;
-	global $graphs, $metrics, $templatecolors, $graphtitle, $graphhost, $graphservice, $aggregate, $colors;
+	global $graphs, $metrics, $templatecolors, $graphtitle, $graphhost, $graphservice, $colors;
+	global $hostpattern, $servicepattern, $graphtitle;
+	global $leftaxisseries, $rightaxisseries, $leftaxisalias,$rightaxisalias;
 
 
 	if (! is_array($graphTemplate["$name"]) ) {
@@ -646,9 +648,9 @@ function createGraphsFromTemplatesHack($name, $orderby="service", $sumgraphs=fal
 	} else {
 
 		$data=fetchGraphiteData();
-
-
 printTimer('postFetch');
+
+//read in our template//
 
 		// our core pattern matching setup - use all 4 to find our metric key.	
 		$prefixpattern=$graphTemplate["$name"]['prefixpattern'];
@@ -679,21 +681,13 @@ printTimer('postFetch');
 		//when $sumgraphs = true (well, nonempty/nonfalse)
 		//with this set to anything, we create a series list of the matching metrics for each y axis
 		//then sumSeries that list
+// done with template
 
 
-		if (! isset($graphs) )
-			$graphs = array();	
 
 
 ///
 
-	$bagaggregate=true;
-		if ( !$bagaggregate ) {
-echo "we shouldn't be jere<br>";
-		} else {
-//////  lets aggregate
-		
-		
 			// one graph per service or host, so our outer loops loops on these
 			//find our list of hosts or services
 			$groupdata=filterData($data,$prefixpattern,$hostpattern,$servicepattern,$suffixpattern,$orderby);
@@ -733,7 +727,7 @@ echo "we shouldn't be jere<br>";
 		//echo "matches count " . count($matches) . "<hr>";
 						foreach ($matches as $value) {
 						
-		echo "in here for $value and $i - orderby is $orderby<br>";
+//echo "in here for $value and $i - orderby is $orderby<br>";
 							unset($graphdata);
 							preg_match("/$prefixpattern\.$hostpattern.*\.$servicepattern\.$suffixpattern/", $value, $graphdata);
 		/*
@@ -775,6 +769,7 @@ echo "we shouldn't be jere<br>";
 
 							// if we ARE going to sum graphs
 							if ( !empty($sumgraphs) ) {
+//echo "summing...$value<br>";
 								if ( !empty($rightaxispattern) && preg_match("/.*$rightaxispattern.*/", $value) ) {
 									if (! empty($rightaxisseries) ) 
 										$rightaxisseries .= ",";
@@ -821,26 +816,27 @@ echo "we shouldn't be jere<br>";
 							if ( !$aggregate) {
 //								if ( !empty($rightaxispattern) && preg_match("/.*$rightaxispattern.*/", $value) ) {
 
-								echo "is we HERE here $sectiontitle - aias $graphalias<br>";
-								produceGraph($orderby,$sectiontitle,$graphalias);
+//								echo "is we HERE here $sectiontitle - aias $graphalias<br>";
+								produceGraph($orderby,$sectiontitle,$graphalias,$sumgraphs);
 								$metrics=array();
 								$i=0;
 							}	
 		
 						} //end foreach matches
 
-						echo "and out of here<br>";
+//						echo "and out of here<br>";
 		/*
 		echo "metrics are <Br>";
 		echo "<pre>";
 		print_R($metrics);
 		echo "</pre>";
-		*/
+		*/		
 		
 						
 						if ( $aggregate ) {
 						echo "is we here<br>";
-							produceGraph($orderby,$sectiontitle,$graphalias);
+							//input here if we're summing is $firstseries/$secondseries, not metrics.
+							produceGraph($orderby,$sectiontitle,$graphalias,$sumgraphs);
 							$metrics=array();
 						}					
 					
@@ -850,9 +846,11 @@ echo "we shouldn't be jere<br>";
 		
 		
 				} //foreach loopdata		
-		}//endif aggregate
+
+
 	}//endif name
 $debuggraph=true;
+$debuggraph=false;
 	if ( $debuggraph ) {
 		echo "<pre>";
 		print_r($graphs);
@@ -861,15 +859,22 @@ $debuggraph=true;
 	}
 
 	printTimer('doneGraphs');
-	echo "<hr>graph count: " . count($graphs) . " - groupby $orderby<hr><br>";
-
+	echo "<hr>graph count: " . count($graphs) . " - groupby $orderby<br>";
+	echo "aggegate = $aggregate and sum is $sumgraphs<br>";
+	echo "<hr>";
 }
 
 
 
-function produceGraph($orderby,$sectiontitle,$graphalias) {
-		global $graphs, $metrics, $templatecolors, $graphtitle, $graphhost, $graphservice, $aggregate, $name, $colors, $COLORS;
-echo "calling productGraph for $name $sectiontitle - alias $graphalias<br>";
+function produceGraph($orderby,$sectiontitle,$graphalias,$sumgraphs) {
+		global $graphs, $metrics, $templatecolors, $graphtitle, $graphhost, $servicepattern, $hostpattern;
+		global $leftaxisseries, $rightaxisseries, $leftaxisalias,$rightaxisalias;
+		global $graphservice, $aggregate, $name, $colors, $COLORS;
+//echo "calling productGraph for $name $sectiontitle - alias $graphalias<br>";
+
+		if (! isset($graphs) )
+			$graphs = array();	
+
 
 						if ( $orderby === "host" ) {
 							$graphtitle = $sectiontitle . " - $graphhost";
@@ -881,7 +886,7 @@ echo "calling productGraph for $name $sectiontitle - alias $graphalias<br>";
 						}
 		
 						if ( !empty($sumgraphs) ) {
-		
+
 							if ( $orderby === "host" ) {
 								$graphtitle = $sectiontitle . " - $graphhost";
 								$graphalias = $servicepattern;
@@ -897,7 +902,8 @@ echo "calling productGraph for $name $sectiontitle - alias $graphalias<br>";
 		
 					
 							if ( !empty($leftaxisseries) ) {
-								$graphalias = $graphalias . " - " . $leftaxisalias;
+
+								$ourgraphalias = $graphalias . " - " . $leftaxisalias;
 								$metricprefix = "";
 								$metricsuffix = "";
 								if ( !empty($leftaxisfunctions) ) {
@@ -907,12 +913,12 @@ echo "calling productGraph for $name $sectiontitle - alias $graphalias<br>";
 									}	
 								}
 								$whatmetric=count($metrics);
-								$metrics[$whatmetric] = "cactiStyle(alias(" . $metricprefix . "sumSeries(" . $leftaxisseries . ")" . $metricsuffix . ", \"$graphalias\"))";
-		//						$metrics[] += "cactiStyle(alias(sumSeries($leftaxisseries), \"$graphalias\"))";
+								$metrics[$whatmetric] = "cactiStyle(alias(" . $metricprefix . "sumSeries(" . $leftaxisseries . ")" . $metricsuffix . ", \"$ourgraphalias\"))";
 							}
 		//we should probably hide the first axis, or only put the second on the second if there wasn't a first...
+		// requires new graphite feature though
 							if ( !empty($rightaxisseries) ) {
-								$graphalias = $graphalias . " - " . $rightaxisalias;
+								$ourgraphalias = $graphalias . " - " . $rightaxisalias;
 								$metricprefix = "";
 								$metricsuffix = "";
 								if ( !empty($rightaxisfunctions) ) {
@@ -922,8 +928,7 @@ echo "calling productGraph for $name $sectiontitle - alias $graphalias<br>";
 									}	
 								}
 								$whatmetric=count($metrics);
-								$metrics[$whatmetric] = "cactiStyle(alias(secondYAxis(" . $metricprefix . "sumSeries(" . $rightaxisseries . ")" . $metricsuffix . "), \"$graphalias\"))";
-		//						$metrics[] += "cactiStyle(alias(secondYAxis(stacked(sumSeries($rightaxisseries))), \"$graphalias\"))";
+								$metrics[$whatmetric] = "cactiStyle(alias(secondYAxis(" . $metricprefix . "sumSeries(" . $rightaxisseries . ")" . $metricsuffix . "), \"$ourgraphalias\"))";
 		
 							}
 							
@@ -1026,7 +1031,7 @@ echo "calling productGraph for $name $sectiontitle - alias $graphalias<br>";
 								echo "6unknown groupby for this graph template - $name<br>";
 								return 1;
 							}
-echo "done it to graphs - $graphservice - $graphhost - $graphalias<br>";
+//echo "done it to graphs - $graphservice - $graphhost - $graphalias<br>";
 
 						}
 
