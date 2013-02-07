@@ -30,8 +30,8 @@ $COLORS = array(
         'orange-red' 		,
       'pink' 				 ,
       'plum' 				 ,
+      'tan' 				 ,
         'wheat' 			,
-        'tan' 				 ,
         'thistle' 			,
         'rosy-brown' 		,
 //        'midnight-blue' 	,
@@ -114,7 +114,7 @@ function addGraphTemplate($name, $sectiontitle, $prefixpattern, $hostpattern, $s
 }
 
 // goal: output a section of graphs from a graph template
-function createGraphsFromTemplates($name, $groupby="service") {
+function createGraphsFromTemplates($name, $orderby="service") {
 	global $graphTemplate, $COLORS, $graphs; 
 
 
@@ -190,9 +190,9 @@ echo "</pre>";
 		//			'is_pie_chart' => 1,
 			);
 
-			if ( "$groupby" == "host" ) {
+			if ( "$orderby" == "host" ) {
 				$graphs["$graphhost"]["$graphservice"] = $newgraph;
-			} elseif ( "$groupby" == "service" ) {
+			} elseif ( "$orderby" == "service" ) {
 				$graphs["$graphservice"]["$graphhost"] = $newgraph;
 			} else { 
 				echo "unknown groupby for this graph template - $name";
@@ -205,7 +205,7 @@ echo "</pre>";
 	}
 
 	printTimer('doneGraphs');
-	echo "<hr>graph count: " . count($graphs) . " - groupby $groupby<hr><br>";
+	echo "<hr>graph count: " . count($graphs) . " - groupby $orderby<hr><br>";
 	
 
 
@@ -280,10 +280,8 @@ function filterData($data,$prefixpattern,$hostpattern,$servicepattern,$suffixpat
 
 
 
-function createGraphsFromTemplatesAggregate($name, $groupby="service") {
+function createGraphsFromTemplatesAggregate($name, $orderby="service", $sumgraphs=false) {
 	global $graphTemplate, $COLORS, $graphs; 
-
-$g=1;
 
 
 	if (! is_array($graphTemplate["$name"]) ) {
@@ -294,51 +292,71 @@ $g=1;
 		$data=fetchGraphiteData();
 
 printTimer('postFetch');
-	
+
+		// our core pattern matching setup - use all 4 to find our metric key.	
 		$prefixpattern=$graphTemplate["$name"]['prefixpattern'];
-		$hostpattern=$graphTemplate["$name"]['hostpattern'];
-		$servicepattern=$graphTemplate["$name"]['servicepattern'];
-
-		// these two allow to to split $servicepattern matches and place them on 
-		// the two Y axis
-		$firstypattern = isset($graphTemplate["$name"]['firstypattern']) ? $graphTemplate["$name"]['firstypattern']:$servicepattern=$graphTemplate["$name"]['servicepattern'];
-		$secondypattern = isset($graphTemplate["$name"]['secondypattern']) ? $graphTemplate["$name"]['secondypattern']:"";
-
+		$hostpattern=$graphTemplate["$name"]['hostpattern']; 		// this is the..well.host.
+		$servicepattern=$graphTemplate["$name"]['servicepattern'];  //this is what gets graphed
 		$suffixpattern=$graphTemplate["$name"]['suffixpattern'];
+
+		// these two allow us to split $servicepattern matches and place them on 
+		// the two Y axis
+		$leftaxispattern = isset($graphTemplate["$name"]['leftaxispattern']) ? $graphTemplate["$name"]['leftaxispattern']:$servicepattern=$graphTemplate["$name"]['servicepattern'];
+		$rightaxispattern = isset($graphTemplate["$name"]['rightaxispattern']) ? $graphTemplate["$name"]['rightaxispattern']:"";
+		// extra alias info
+		$leftaxisalias = isset($graphTemplate["$name"]['leftaxisalias']) ? $graphTemplate["$name"]['leftaxisalias']:"";
+		$rightaxisalias = isset($graphTemplate["$name"]['rightaxisalias']) ? $graphTemplate["$name"]['rightaxisalias']:"";
+		//comma seperated list of extra functions to apply...
+		// no spaces!
+		// and these only apply inside the alias(
+		$leftaxisfunctions = isset($graphTemplate["$name"]['leftaxisfunctions']) ? explode(",",$graphTemplate["$name"]['leftaxisfunctions']):"";
+		$rightaxisfunctions = isset($graphTemplate["$name"]['rightaxisfunctions']) ? explode(",",$graphTemplate["$name"]['rightaxisfunctions']):"";
+
+		$templatecolors = isset($graphTemplate["$name"]['colors']) ? $graphTemplate["$name"]['colors']:"";
+		
 
 		$sectiontitle=$graphTemplate["$name"]['sectiontitle'];
 
 
+
+		//when $sumgraphs = true (well, nonempty/nonfalse)
 		//with this set to anything, we create a series list of the matching metrics for each y axis
 		//then sumSeries that list
-		$sumgraphs = isset($graphTemplate["$name"]['sumgraphs']) ? $graphTemplate["$name"]['sumgraphs']:false;
 
 
 		if (! isset($graphs) )
 			$graphs = array();	
 
 		//find our list of hosts or services
-		$groupdata=filterData($data,$prefixpattern,$hostpattern,$servicepattern,$suffixpattern,$groupby);
+		$groupdata=filterData($data,$prefixpattern,$hostpattern,$servicepattern,$suffixpattern,$orderby);
 		//lets pre-filter our data.  no need to retain the whole set for searching later! 
 		// saves huge amounts of time for later preg_matching
 		$data = preg_grep("/$prefixpattern\.$hostpattern.*\.$servicepattern\.$suffixpattern/", $data);
 
 
+
+/*
+echo "$orderby list<br>";
+echo "<pre>";
+print_r($groupdata);
+echo "</pre>";
+*/
 		// loop across list of services or hosts
+		// we produce a graph for each of these.
 		foreach ($groupdata as $groupid) {
 			
-			$series="";
-			$yseries="";
+			$leftaxisseries="";
+			$rightaxisseries="";
 			$metrics = array();
 			$i = 0;
 	
 			// now identify our matches we'll use later
-			if ( $groupby === "host" ) {
+			if ( $orderby === "host" ) {
 				$matches = preg_grep("/$prefixpattern\.$groupid.*\.$servicepattern\.$suffixpattern/", $data);
-			} elseif ( $groupby === "service" ) { 
-				$matches = preg_grep("/$prefixpattern\.$hostpattern.*\.$groupid.*\.$suffixpattern/", $data);				
+			} elseif ( $orderby === "service" ) { 
+				$matches = preg_grep("/$prefixpattern\.$hostpattern.*\.$groupid\.$suffixpattern/", $data);				
 			} else {
-				echo "unknown groupby $groupby";
+				echo "unknown groupby $orderby";
 				return 1;
 			}
 
@@ -372,96 +390,184 @@ echo "</pre>";
 					$graphservice=$graphdata[3];
 					$graphsuffix=$graphdata[4];
 
-					if ( $groupby === "host" ) {
+
+					// figure out how we're going to setup our alias.  basically should be opposite of our
+					// graph title
+					if ( $orderby === "host" ) {
 						$graphalias = $graphhost;
-					} elseif ( $groupby === "service" ) { 
+					} elseif ( $orderby === "service" ) { 
 						$graphalias = $graphservice;
 					} else {
-						echo "unknown groupby $groupby";
+						echo "unknown groupby $orderby";
+						return 1;
+					}
+
+
+										
+					
+					if ( $orderby === "host" ) {
+						$graphalias = $graphservice;
+					} elseif ( $orderby === "service" ) { 
+						$graphalias = $graphhost;
+					} else {
+						echo "unknown groupby $orderby";
 						return 1;
 					}
 
 					if ( !empty($sumgraphs) ) {
-						if ( !empty($secondypattern) && preg_match("/.*$secondypattern.*/", $value) ) {
-							if (! empty($yseries) ) 
-							 $yseries .= ",";
-						 $yseries .= "keepLastValue(" . $value . ")";
+						if ( !empty($rightaxispattern) && preg_match("/.*$rightaxispattern.*/", $value) ) {
+							if (! empty($rightaxisseries) ) 
+								$rightaxisseries .= ",";
+						 	$rightaxisseries .= $value ;
 						} else {
-							if (! empty($series) ) 
-							 $series .= ",";
-						 $series .= "keepLastValue(" . $value . ")";
+							if (! empty($leftaxisseries) ) 
+								$leftaxisseries .= ",";
+						 	$leftaxisseries .= $value;
 						}
 					} else { 
-						if ( !empty($secondypattern) && preg_match("/.*$secondypattern.*/", $value) ) {
-	
-							$metrics[$i] = "cactiStyle(alias(secondYAxis(stacked($value)), \"$graphalias\"))";
-			
+						if ( !empty($rightaxispattern) && preg_match("/.*$rightaxispattern.*/", $value) ) {
+							if (!empty($rightaxisalias) ) 
+								$graphalias = $graphalias . " - " . $rightaxisalias;
+								
+							$metricprefix = "";
+							$metricsuffix = "";
+							if ( !empty($rightaxisfunctions) ) {
+								foreach ( $rightaxisfunctions as $function) {
+									$metricprefix .= $function . "(";
+									$metricsuffix .= ")";
+								}	
+							}
+							$metrics[$i] = "cactiStyle(alias(secondYAxis(" . $metricprefix . $value . $metricsuffix . "), \"$graphalias\"))";
 						} else {
-							$metrics[$i] = "cactiStyle(alias(keepLastValue($value), \"$graphalias\"))";
-						
+							if ( !empty($leftaxisalias) ) 
+								$graphalias = $graphalias . " - " . $leftaxisalias;
+							$metricprefix = "";
+							$metricsuffix = "";
+							if ( !empty($leftaxisfunctions) ) {
+								foreach ( $leftaxisfunctions as $function) {
+									$metricprefix .= $function . "(";
+									$metricsuffix .= ")";
+								}	
+							}
+							$metrics[$i] = "cactiStyle(alias(" . $metricprefix . $value . $metricsuffix . ", \"$graphalias\"))";
 						}
 					}
-
-
-					if (! isset($colorid) )
-					//	$colorid = 0;
-						$colorid = rand(0, count($COLORS)-1);				
-					if ( $colorid > count($COLORS)-1 )
-					//	$colorid = 0;					
-						$colorid = rand(0, count($COLORS)-1);				
-	
-						//$colorid = rand(0, count($COLORS)-1);				
-					$colors[$i] = $COLORS[$colorid];
-					$colorid++;
 					$i++;
 
+
+
 				} //end foreach matches
+/*
+echo "metrics are <Br>";
+echo "<pre>";
+print_R($metrics);
+echo "</pre>";
+*/
 
-
-				if ( $groupby === "host" ) {
+				if ( $orderby === "host" ) {
 					$graphtitle = $sectiontitle . " - $graphhost";
-				} elseif ( $groupby === "service" ) { 
+				} elseif ( $orderby === "service" ) { 
 					$graphtitle = $sectiontitle . " - $graphservice";
 				} else {
-					echo "unknown groupby $groupby";
+					echo "unknown groupby $orderby";
 					return 1;
 				}
 
-
 				if ( !empty($sumgraphs) ) {
 
-					//backwards on purpose!
-					if ( $groupby === "host" ) {
-						$graphtitle = $sectiontitle . " - $graphservice";
-					} elseif ( $groupby === "service" ) { 
+					if ( $orderby === "host" ) {
 						$graphtitle = $sectiontitle . " - $graphhost";
+						$graphalias = $servicepattern;
+
+					} elseif ( $orderby === "service" ) { 
+						$graphtitle = $sectiontitle . " - $graphservice";
+						$graphalias = $hostpattern;
 					} else {
-						echo "unknown groupby $groupby";
+						echo "unknown groupby $orderby";
 						return 1;
 					}
-			
 
-					if ( !empty($series) ) {
-						$whatmetric = count($metrics); //because the count starts at 0, this returns the next vue.
-						$metrics[$whatmetric] = "cactiStyle(alias(sumSeries($series), \"$graphalias\"))";
+
+			
+					if ( !empty($leftaxisseries) ) {
+						$graphalias = $graphalias . " - " . $leftaxisalias;
+						$metricprefix = "";
+						$metricsuffix = "";
+						if ( !empty($leftaxisfunctions) ) {
+							foreach ( $leftaxisfunctions as $function) {
+								$metricprefix .= $function . "(";
+								$metricsuffix .= ")";
+							}	
+						}
+						$whatmetric=count($metrics);
+						$metrics[$whatmetric] = "cactiStyle(alias(" . $metricprefix . "sumSeries(" . $leftaxisseries . ")" . $metricsuffix . ", \"$graphalias\"))";
+//						$metrics[] += "cactiStyle(alias(sumSeries($leftaxisseries), \"$graphalias\"))";
 					}
 //we should probably hide the first axis, or only put the second on the second if there wasn't a first...
-					if ( !empty($yseries) ) {
-						$whatmetric = count($metrics); //because the count starts at 0, this returns the next vue.
-						$metrics[$whatmetric] = "cactiStyle(alias(secondYAxis(stacked(sumSeries($yseries))), \"$graphalias\"))";
+					if ( !empty($rightaxisseries) ) {
+						$graphalias = $graphalias . " - " . $rightaxisalias;
+						$metricprefix = "";
+						$metricsuffix = "";
+						if ( !empty($rightaxisfunctions) ) {
+							foreach ( $rightaxisfunctions as $function) {
+								$metricprefix .= $function . "(";
+								$metricsuffix .= ")";
+							}	
+						}
+						$whatmetric=count($metrics);
+						$metrics[$whatmetric] = "cactiStyle(alias(secondYAxis(" . $metricprefix . "sumSeries(" . $rightaxisseries . ")" . $metricsuffix . "), \"$graphalias\"))";
+//						$metrics[] += "cactiStyle(alias(secondYAxis(stacked(sumSeries($rightaxisseries))), \"$graphalias\"))";
 
 					}
 					
+				}
+				
+				$ii=0;
+				$colors=array();
+				while ( $ii <= count($metrics)-1 ) {
+				// if we don't define a set of colors to use, use our global set
+					if ( empty($templatecolors) ) {
+						if (! isset($colorid) )
+						//	$colorid = 0;
+							$colorid = rand(0, count($COLORS)-1);				
+						//prevent dup colors next to each other anyway	
+						if ( isset($lastcolorid) && $lastcolorid === $colorid ) 
+							$colorid++;
+						if ( $colorid > count($COLORS)-1 )
+						//	$colorid = 0;					
+							$colorid = rand(0, count($COLORS)-1);				
+		
+							//$colorid = rand(0, count($COLORS)-1);				
+						$colors[$ii] = $COLORS[$colorid];
+						$colorid++;
+						$ii++;
+					} else {
+						if (! isset($colorid) )
+						//	$colorid = 0;
+							$colorid = rand(0, count($templatecolors)-1);	
+						//prevent dup colors next to each other anyway	
+						if ( isset($lastcolorid) && $lastcolorid === $colorid ) 
+							$colorid++;
+						if ( $colorid > count($templatecolors)-1 )
+						//	$colorid = 0;					
+							$colorid = rand(0, count($templatecolors)-1);				
+						$colors[$ii] = $templatecolors[$colorid];
+						$lastcolorid = $colorid;
+						$colorid++;
+						$ii++;						
+					}
 				}
 
 
 				$graphtitle = $graphtitle . " (" . count($metrics) . ")";
 
+//this should really double if we're wide enough..hrm...
 				if ( count($metrics) > 4 ) {
 					$showlegend=0;
 				} else {
 					$showlegend=1;
 				}
+				//hideLegend=false to force it on for testin
 
 				$newgraph = 
 					array(
@@ -472,7 +578,8 @@ echo "</pre>";
 						'show_html_legend' => 1,
 						'show_copy_url' => 0,
 //						'height' => '120',
-//						'color' => $colors,
+						'colors' => $colors,
+//'colors' => array('green', 'red'),
 			//			'width' => '200',
 			//			'area_mode' => 'first',
 			//			'line_mode' => 'connected',
@@ -482,15 +589,14 @@ echo "</pre>";
 			//			'is_ajax' => 1,
 			//			'is_pie_chart' => 1,
 				);
-//echo "setting graph array: graphs [$graphhost] [$graphservice] " . $g++ . "<br>";
 
 
 				// this sets up the graph array - we group on-page by the first arg, and display the second arg
-				if ( "$groupby" == "host" ) {
-					$graphs["$sectiontitle($groupby)"]["$graphhost"] = $newgraph;
+				if ( "$orderby" == "host" ) {
+					$graphs["$sectiontitle($orderby)"]["$graphhost"] = $newgraph;
 
-				} elseif ( "$groupby" == "service" ) {
-					$graphs["$sectiontitle($groupby)"]["$graphservice"] = $newgraph;
+				} elseif ( "$orderby" == "service" ) {
+					$graphs["$sectiontitle($orderby)"]["$graphservice"] = $newgraph;
 				} else { 
 					echo "unknown groupby for this graph template - $name";
 					return 1;
@@ -504,14 +610,426 @@ echo "</pre>";
 		} //foreach loopdata		
 	}
 
-
+/*
 	echo "<pre>";
 	print_r($graphs);
+	print_r($colors);
 	echo "</pre>";
-
+*/
 
 	printTimer('doneGraphs');
-	echo "<hr>graph count: " . count($graphs) . " - groupby $groupby<hr><br>";
+	echo "<hr>graph count: " . count($graphs) . " - groupby $orderby<hr><br>";
 
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+function createGraphsFromTemplatesHack($name, $orderby="service", $sumgraphs=false,$aggregate=false) {
+	global $graphTemplate, $COLORS, $graphs;
+	global $graphs, $metrics, $templatecolors, $graphtitle, $graphhost, $graphservice, $aggregate, $colors;
+
+
+	if (! is_array($graphTemplate["$name"]) ) {
+		echo "sorry, can't find graph template named $name<br>";
+		exit;
+	} else {
+
+		$data=fetchGraphiteData();
+
+
+printTimer('postFetch');
+
+		// our core pattern matching setup - use all 4 to find our metric key.	
+		$prefixpattern=$graphTemplate["$name"]['prefixpattern'];
+		$hostpattern=$graphTemplate["$name"]['hostpattern']; 		// this is the..well.host.
+		$servicepattern=$graphTemplate["$name"]['servicepattern'];  //this is what gets graphed
+		$suffixpattern=$graphTemplate["$name"]['suffixpattern'];
+
+		// these two allow us to split $servicepattern matches and place them on 
+		// the two Y axis
+		$leftaxispattern = isset($graphTemplate["$name"]['leftaxispattern']) ? $graphTemplate["$name"]['leftaxispattern']:$servicepattern=$graphTemplate["$name"]['servicepattern'];
+		$rightaxispattern = isset($graphTemplate["$name"]['rightaxispattern']) ? $graphTemplate["$name"]['rightaxispattern']:"";
+		// extra alias info
+		$leftaxisalias = isset($graphTemplate["$name"]['leftaxisalias']) ? $graphTemplate["$name"]['leftaxisalias']:"";
+		$rightaxisalias = isset($graphTemplate["$name"]['rightaxisalias']) ? $graphTemplate["$name"]['rightaxisalias']:"";
+		//comma seperated list of extra functions to apply...
+		// no spaces!
+		// and these only apply inside the alias(
+		$leftaxisfunctions = isset($graphTemplate["$name"]['leftaxisfunctions']) ? explode(",",$graphTemplate["$name"]['leftaxisfunctions']):"";
+		$rightaxisfunctions = isset($graphTemplate["$name"]['rightaxisfunctions']) ? explode(",",$graphTemplate["$name"]['rightaxisfunctions']):"";
+
+		$templatecolors = isset($graphTemplate["$name"]['colors']) ? $graphTemplate["$name"]['colors']:"";
+		
+
+		$sectiontitle=$graphTemplate["$name"]['sectiontitle'];
+
+
+
+		//when $sumgraphs = true (well, nonempty/nonfalse)
+		//with this set to anything, we create a series list of the matching metrics for each y axis
+		//then sumSeries that list
+
+
+		if (! isset($graphs) )
+			$graphs = array();	
+
+
+///
+
+	$bagaggregate=true;
+		if ( !$bagaggregate ) {
+echo "we shouldn't be jere<br>";
+		} else {
+//////  lets aggregate
+		
+		
+			// one graph per service or host, so our outer loops loops on these
+			//find our list of hosts or services
+			$groupdata=filterData($data,$prefixpattern,$hostpattern,$servicepattern,$suffixpattern,$orderby);
+			//lets pre-filter our data.  no need to retain the whole set for searching later! 
+			// saves huge amounts of time for later preg_matching
+			$data = preg_grep("/$prefixpattern\.$hostpattern.*\.$servicepattern\.$suffixpattern/", $data);
+
+		
+
+		echo "$orderby list<br>";
+		echo "<pre>";
+		print_r($groupdata);
+		echo "</pre>";
+
+				// loop across list of services or hosts
+				// we produce a graph for each of these.
+				foreach ($groupdata as $groupid) {
+					
+					$leftaxisseries="";
+					$rightaxisseries="";
+					$metrics = array();
+					$i = 0;
+			
+					// now identify our matches we'll use later
+					if ( $orderby === "host" ) {
+						$matches = preg_grep("/$prefixpattern\.$groupid.*\.$servicepattern\.$suffixpattern/", $data);
+					} elseif ( $orderby === "service" ) { 
+						$matches = preg_grep("/$prefixpattern\.$hostpattern.*\.$groupid\.$suffixpattern/", $data);				
+					} else {
+						echo "unknown groupby $orderby";
+						return 1;
+					}
+		
+					if ( isset($matches) && count($matches) > 0)  {
+						$matches = array_unique($matches);
+		
+		//echo "matches count " . count($matches) . "<hr>";
+						foreach ($matches as $value) {
+						
+		echo "in here for $value and $i - orderby is $orderby<br>";
+							unset($graphdata);
+							preg_match("/$prefixpattern\.$hostpattern.*\.$servicepattern\.$suffixpattern/", $value, $graphdata);
+		/*
+		echo "<pre>";
+		echo "$value<br>";
+		print_r($graphdata);
+		echo "</pre>";
+		*/
+							if (! isset($graphdata[0]) ) {
+								echo "we failed to set graphdata, what happened...value $value<br>";
+							}
+							$graphtarget=$graphdata[0];
+							$graphprefix=$graphdata[1];
+							$graphhost=$graphdata[2];
+							$graphservice=$graphdata[3];
+							$graphsuffix=$graphdata[4];
+		
+		
+							// figure out how we're going to setup our alias.  basically should be opposite of our
+							// graph title
+//umm....
+							if ( $orderby === "host" ) {
+								$graphalias = $graphhost;
+							} elseif ( $orderby === "service" ) { 
+								$graphalias = $graphservice;
+							} else {
+								echo "1unknown groupby $orderby";
+								return 1;
+							}												
+//se umm...							
+							if ( $orderby === "host" ) {
+								$graphalias = $graphservice;
+							} elseif ( $orderby === "service" ) { 
+								$graphalias = $graphhost;
+							} else {
+								echo "2unknown groupby $orderby";
+								return 1;
+							}
+
+							// if we ARE going to sum graphs
+							if ( !empty($sumgraphs) ) {
+								if ( !empty($rightaxispattern) && preg_match("/.*$rightaxispattern.*/", $value) ) {
+									if (! empty($rightaxisseries) ) 
+										$rightaxisseries .= ",";
+									$rightaxisseries .= $value ;
+								} else {
+									if (! empty($leftaxisseries) ) 
+										$leftaxisseries .= ",";
+									$leftaxisseries .= $value;
+								}
+							} else { 
+							// we're not summing
+								if ( !empty($rightaxispattern) && preg_match("/.*$rightaxispattern.*/", $value) ) {
+									if (!empty($rightaxisalias) ) 
+										$graphalias = $graphalias . " - " . $rightaxisalias;
+										
+									$metricprefix = "";
+									$metricsuffix = "";
+									if ( !empty($rightaxisfunctions) ) {
+										foreach ( $rightaxisfunctions as $function) {
+											$metricprefix .= $function . "(";
+											$metricsuffix .= ")";
+										}	
+									}
+									$metrics[$i] = "cactiStyle(alias(secondYAxis(" . $metricprefix . $value . $metricsuffix . "), \"$graphalias\"))";
+								} else {
+									if ( !empty($leftaxisalias) ) 
+										$graphalias = $graphalias . " - " . $leftaxisalias;
+									$metricprefix = "";
+									$metricsuffix = "";
+									if ( !empty($leftaxisfunctions) ) {
+										foreach ( $leftaxisfunctions as $function) {
+											$metricprefix .= $function . "(";
+											$metricsuffix .= ")";
+										}	
+									}
+									$metrics[$i] = "cactiStyle(alias(" . $metricprefix . $value . $metricsuffix . ", \"$graphalias\"))";
+								}
+							  
+							}
+							$i++;
+		
+		//but we really need to still combine if we're matching secondy...
+							//if we're not aggregating, spit out a graph here
+							if ( !$aggregate) {
+//								if ( !empty($rightaxispattern) && preg_match("/.*$rightaxispattern.*/", $value) ) {
+
+								echo "is we HERE here $sectiontitle - aias $graphalias<br>";
+								produceGraph($orderby,$sectiontitle,$graphalias);
+								$metrics=array();
+								$i=0;
+							}	
+		
+						} //end foreach matches
+
+						echo "and out of here<br>";
+		/*
+		echo "metrics are <Br>";
+		echo "<pre>";
+		print_R($metrics);
+		echo "</pre>";
+		*/
+		
+						
+						if ( $aggregate ) {
+						echo "is we here<br>";
+							produceGraph($orderby,$sectiontitle,$graphalias);
+							$metrics=array();
+						}					
+					
+					} else {
+						echo "wtf, no matches man<br>";
+					}
+		
+		
+				} //foreach loopdata		
+		}//endif aggregate
+	}//endif name
+$debuggraph=true;
+	if ( $debuggraph ) {
+		echo "<pre>";
+		print_r($graphs);
+//		print_r($colors);
+		echo "</pre>";
+	}
+
+	printTimer('doneGraphs');
+	echo "<hr>graph count: " . count($graphs) . " - groupby $orderby<hr><br>";
+
+}
+
+
+
+function produceGraph($orderby,$sectiontitle,$graphalias) {
+		global $graphs, $metrics, $templatecolors, $graphtitle, $graphhost, $graphservice, $aggregate, $name, $colors, $COLORS;
+echo "calling productGraph for $name $sectiontitle - alias $graphalias<br>";
+
+						if ( $orderby === "host" ) {
+							$graphtitle = $sectiontitle . " - $graphhost";
+						} elseif ( $orderby === "service" ) { 
+							$graphtitle = $sectiontitle . " - $graphservice";
+						} else {
+							echo "3unknown groupby $orderby";
+							return 1;
+						}
+		
+						if ( !empty($sumgraphs) ) {
+		
+							if ( $orderby === "host" ) {
+								$graphtitle = $sectiontitle . " - $graphhost";
+								$graphalias = $servicepattern;
+		
+							} elseif ( $orderby === "service" ) { 
+								$graphtitle = $sectiontitle . " - $graphservice";
+								$graphalias = $hostpattern;
+							} else {
+								echo "4unknown groupby $orderby";
+								return 1;
+							}
+		
+		
+					
+							if ( !empty($leftaxisseries) ) {
+								$graphalias = $graphalias . " - " . $leftaxisalias;
+								$metricprefix = "";
+								$metricsuffix = "";
+								if ( !empty($leftaxisfunctions) ) {
+									foreach ( $leftaxisfunctions as $function) {
+										$metricprefix .= $function . "(";
+										$metricsuffix .= ")";
+									}	
+								}
+								$whatmetric=count($metrics);
+								$metrics[$whatmetric] = "cactiStyle(alias(" . $metricprefix . "sumSeries(" . $leftaxisseries . ")" . $metricsuffix . ", \"$graphalias\"))";
+		//						$metrics[] += "cactiStyle(alias(sumSeries($leftaxisseries), \"$graphalias\"))";
+							}
+		//we should probably hide the first axis, or only put the second on the second if there wasn't a first...
+							if ( !empty($rightaxisseries) ) {
+								$graphalias = $graphalias . " - " . $rightaxisalias;
+								$metricprefix = "";
+								$metricsuffix = "";
+								if ( !empty($rightaxisfunctions) ) {
+									foreach ( $rightaxisfunctions as $function) {
+										$metricprefix .= $function . "(";
+										$metricsuffix .= ")";
+									}	
+								}
+								$whatmetric=count($metrics);
+								$metrics[$whatmetric] = "cactiStyle(alias(secondYAxis(" . $metricprefix . "sumSeries(" . $rightaxisseries . ")" . $metricsuffix . "), \"$graphalias\"))";
+		//						$metrics[] += "cactiStyle(alias(secondYAxis(stacked(sumSeries($rightaxisseries))), \"$graphalias\"))";
+		
+							}
+							
+						}
+					
+
+						$ii=0;
+						$colors=array();
+						while ( $ii <= count($metrics)-1 ) {
+						// if we don't define a set of colors to use, use our global set
+							if ( empty($templatecolors) ) {
+								if (! isset($colorid) )
+								//	$colorid = 0;
+									$colorid = rand(0, count($COLORS)-1);				
+								//prevent dup colors next to each other anyway	
+								if ( isset($lastcolorid) && $lastcolorid === $colorid ) 
+									$colorid++;
+								if ( $colorid > count($COLORS)-1 )
+								//	$colorid = 0;					
+									$colorid = rand(0, count($COLORS)-1);				
+				
+									//$colorid = rand(0, count($COLORS)-1);				
+								$colors[$ii] = $COLORS[$colorid];
+								$colorid++;
+								$ii++;
+							} else {
+								if (! isset($colorid) )
+								//	$colorid = 0;
+									$colorid = rand(0, count($templatecolors)-1);	
+								//prevent dup colors next to each other anyway	
+								if ( isset($lastcolorid) && $lastcolorid === $colorid ) 
+									$colorid++;
+								if ( $colorid > count($templatecolors)-1 )
+								//	$colorid = 0;					
+									$colorid = rand(0, count($templatecolors)-1);				
+								$colors[$ii] = $templatecolors[$colorid];
+								$lastcolorid = $colorid;
+								$colorid++;
+								$ii++;						
+							}
+						}
+		
+		
+						$graphtitle = $graphtitle . " (" . count($metrics) . ")";
+		
+		//this should really double if we're wide enough..hrm...
+						if ( count($metrics) > 4 ) {
+							$showlegend=0;
+						} else {
+							$showlegend=1;
+						}
+						//hideLegend=false to force it on for testin
+		
+						$newgraph = 
+							array(
+								'type' => 'graphite',
+								'title' => $graphtitle,
+								'metrics' => $metrics, 
+								'show_legend' => $showlegend,
+								'show_html_legend' => 1,
+								'show_copy_url' => 0,
+					//			'height' => '120',
+								'colors' => $colors,
+					//			'width' => '200',
+					//			'area_mode' => 'first',
+					//			'line_mode' => 'connected',
+					//			'line_mode' => 'slope',
+					//			'line_mode' => 'staircase',
+					//			'vtitle' => 'vtitle is not fun',
+					//			'is_ajax' => 1,
+					//			'is_pie_chart' => 1,
+						);
+					
+					$debuggraph=false;
+	if ( $debuggraph ) {
+		echo "new graph is <br>";
+		echo "<pre>";
+		print_r($newgraph);
+		echo "</pre>";
+	}
+
+					
+						if ( $aggregate ) {
+							// this sets up the graph array - we group on-page by the first arg, and display the second arg
+							if ( "$orderby" == "host" ) {
+								$graphs["$sectiontitle($orderby)"]["$graphhost"] = $newgraph;
+			
+							} elseif ( "$orderby" == "service" ) {
+								$graphs["$sectiontitle($orderby)"]["$graphservice"] = $newgraph;
+							} else { 
+								echo "5unknown groupby for this graph template - $name<br>";
+								return 1;
+							}
+						} else {
+							if ( "$orderby" == "host" ) {
+								$graphs["$graphhost"]["$graphservice-$graphalias"] = $newgraph;
+							} elseif ( "$orderby" == "service" ) {
+								$graphs["$graphservice"]["$graphhost-$graphalias"] = $newgraph;
+							} else { 
+								echo "6unknown groupby for this graph template - $name<br>";
+								return 1;
+							}
+echo "done it to graphs - $graphservice - $graphhost - $graphalias<br>";
+
+						}
+
+
+} //end func produce graph
+					
