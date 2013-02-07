@@ -38,23 +38,27 @@ addGraphTemplate(
 
 
 $graphTemplate['test template bypass'] = array(
-		'type' => 'graphite',
-		'sectiontitle' => 'kiwi rpc test counters',
-		'prefixpattern' => '(^statsd)',
-		'hostpattern' => '(.*app.*)\.kiwi',	
-		'servicepattern' => '(rpc\..*)',
-//		'servicepattern' => '(rpc\..*errors|rpc\..*count)',
-//		'servicepattern' => '(rpc\.blaze\.post\..*)',
-		'suffixpattern' => '(errors\.counters\.count|count\.counters\.count)'
+		'type' => 'graphite'
+		,'sectiontitle' => 'kiwi rpc test counters'
+		,'prefixpattern' => '(^statsd)'
+		,'hostpattern' => '(.*app.*)\.kiwi'
+//		,'servicepattern' => '(rpc\..*)'
+		//,'servicepattern' => '(rpc\..*errors|rpc\..*count)'  //this shouldnt and doesnt work
+//		'servicepattern' => '(rpc\.blaze\.post\..*)'
+		,'servicepattern' => '(rpc\.blaze\..*)'	
+//		,'servicepattern' => '(rpc\.auction\..*)'	
+		,'suffixpattern' => '(errors\.counters\.count|count\.counters\.count)'
 
 		,'leftaxispattern' => '(rpc\..*\.count)'
 		,'leftaxisalias' => 'count'
 		,'leftaxisfunctions' => 'keepLastValue'
 		,'rightaxispattern' => '(rpc\..*\.errors)'
 		,'rightaxisalias' => 'errors'
-		,'rightaxisfunctions' => 'keepLastValue'
-//		,'servicepattern' => '(rpc\.blaze\..*)'	
-//		,'servicepattern' => '(rpc\.auction\..*)'	
+// so we probably will need some specific logic around stacks, wen we can'cant use them
+//		,'rightaxisfunctions' => 'secondYAxis,stacked,keepLastValue'
+		,'rightaxisfunctions' => 'stacked,keepLastValue'
+
+
 //		,'leftaxispattern' => '(rpc\.blaze\.post\.count)	
 //		,'rightaxispattern' => '(rpc\.blaze\.post\.errors)'	
 //		,'suffixpattern' => '([e,c].*\.counters\.count)'
@@ -67,13 +71,13 @@ $graphTemplate['test template bypass'] = array(
 
 //1
 //  group by service, each service and each host on it's own graph - err/count split
-//createGraphsFromTemplates("test template bypass", "service", false, false);
-//2
-//  group by service, aggregate each service (all hosts) onto one graph
-//createGraphsFromTemplates("test template bypass", "service", false, true);
+createGraphsFromTemplates("test template bypass", "service", false, false);
 //5
 //  group by service, each service and each host on it's own graph - err/count combined and sum
 //createGraphsFromTemplates("test template bypass", "service", true, false);
+//2
+//  group by service, aggregate each service (all hosts) onto one graph
+//createGraphsFromTemplates("test template bypass", "service", false, true);
 //6
 //  group by service, aggregate each service (all hosts) onto one graph and sum
 //createGraphsFromTemplates("test template bypass", "service", true, true);
@@ -88,7 +92,7 @@ $graphTemplate['test template bypass'] = array(
 //createGraphsFromTemplates("test template bypass", "host", true, false);
 //8
 //  group by host, aggregate each host (all services) onto one graph
-createGraphsFromTemplates("test template bypass", "host", true, true);
+//createGraphsFromTemplates("test template bypass", "host", true, true);
 
 
 

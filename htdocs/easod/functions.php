@@ -175,11 +175,13 @@ function filterData($data,$prefixpattern,$hostpattern,$servicepattern,$suffixpat
 //createGraphsFromTemplates("test template bypass", "host", true, true);
 
 
+// TODO - lefty/righty becomes an array of emtrics and their stuff...
+
 function createGraphsFromTemplates($name, $orderby="service", $sumgraphs=false,$aggregate=false) {
 	global $graphTemplate, $COLORS, $graphs;
 	global $graphs, $metrics, $templatecolors, $graphtitle, $graphhost, $graphservice, $colors;
 	global $hostpattern, $servicepattern, $graphtitle, $sectiontitle,$graphalias;
-	global $leftaxisseries, $rightaxisseries, $leftaxisalias,$rightaxisalias;
+	global $leftaxisseries, $rightaxisseries, $leftaxisalias,$rightaxisalias, $leftaxisfunctions, $rightaxisfunctions;
 
 //	$debuggraph=true;
 	$debuggraph=false;
@@ -318,7 +320,8 @@ printTimer('postFetch');
 									$metricsuffix .= ")";
 								}	
 							}
-							$metrics[$i] = "cactiStyle(alias(secondYAxis(" . $metricprefix . $value . $metricsuffix . "), \"$graphalias\"))";
+//							$metrics[$i] = "cactiStyle(alias(secondYAxis(" . $metricprefix . $value . $metricsuffix . "), \"$graphalias\"))";
+							$metrics[$i] = "cactiStyle(alias(" . $metricprefix . $value . $metricsuffix . ", \"$graphalias\"))";
 						} else {
 							if ( !empty($leftaxisalias) ) 
 								$graphalias = $graphalias . " - " . $leftaxisalias;
@@ -392,7 +395,7 @@ printTimer('postFetch');
 
 function produceGraph($orderby,$sumgraphs,$aggregate) {
 		global $graphs, $metrics, $templatecolors, $graphtitle, $graphhost, $servicepattern, $hostpattern;
-		global $leftaxisseries, $rightaxisseries, $leftaxisalias,$rightaxisalias,$sectiontitle,$graphalias;
+		global $leftaxisseries, $rightaxisseries, $leftaxisalias,$rightaxisalias,$sectiontitle,$graphalias,$leftaxisfunctions, $rightaxisfunctions;
 		global $graphservice, $name, $colors, $COLORS;
 //echo "calling productGraph for $name $sectiontitle - alias $graphalias<br>";
 
@@ -465,7 +468,8 @@ function produceGraph($orderby,$sumgraphs,$aggregate) {
 									}	
 								}
 								$whatmetric=count($metrics);
-								$metrics[$whatmetric] = "cactiStyle(alias(secondYAxis(" . $metricprefix . "sumSeries(" . $rightaxisseries . ")" . $metricsuffix . "), \"$ourgraphalias\"))";
+//								$metrics[$whatmetric] = "cactiStyle(alias(secondYAxis(" . $metricprefix . "sumSeries(" . $rightaxisseries . ")" . $metricsuffix . "), \"$ourgraphalias\"))";
+								$metrics[$whatmetric] = "cactiStyle(alias(" . $metricprefix . "sumSeries(" . $rightaxisseries . ")" . $metricsuffix . ", \"$ourgraphalias\"))";
 		
 							}
 							
