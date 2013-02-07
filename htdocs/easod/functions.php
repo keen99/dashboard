@@ -632,13 +632,37 @@ echo "</pre>";
 
 
 
+//1
+//  group by service, each service and each host on it's own graph - err/count split
+//createGraphsFromTemplatesHack("test template bypass", "service", false, false);
+//2
+//  group by service, aggregate each service (all hosts) onto one graph
+//createGraphsFromTemplatesHack("test template bypass", "service", false, true);
+//5
+//  group by service, each service and each host on it's own graph - err/count combined and sum
+//createGraphsFromTemplatesHack("test template bypass", "service", true, false);
+//6
+//  group by service, aggregate each service (all hosts) onto one graph and sum
+//createGraphsFromTemplatesHack("test template bypass", "service", true, true);
 
+//3
+//  group by host, each service and each host on it's own graph - split err/count
+//createGraphsFromTemplatesHack("test template bypass", "host", false, false);
+//4
+//  group by host, aggregate each host (all services) onto one graph
+//createGraphsFromTemplatesHack("test template bypass", "host", false, true);
+//7
+//  group by host, each service and each host on it's own graph - combined errr/count
+//createGraphsFromTemplatesHack("test template bypass", "host", true, false);
+//8
+//  group by host, aggregate each host (all services) onto one graph
+//createGraphsFromTemplatesHack("test template bypass", "host", true, true);
 
 
 function createGraphsFromTemplatesHack($name, $orderby="service", $sumgraphs=false,$aggregate=false) {
 	global $graphTemplate, $COLORS, $graphs;
 	global $graphs, $metrics, $templatecolors, $graphtitle, $graphhost, $graphservice, $colors;
-	global $hostpattern, $servicepattern, $graphtitle;
+	global $hostpattern, $servicepattern, $graphtitle, $sectiontitle,$graphalias;
 	global $leftaxisseries, $rightaxisseries, $leftaxisalias,$rightaxisalias;
 
 
@@ -817,7 +841,7 @@ printTimer('postFetch');
 //								if ( !empty($rightaxispattern) && preg_match("/.*$rightaxispattern.*/", $value) ) {
 
 //								echo "is we HERE here $sectiontitle - aias $graphalias<br>";
-								produceGraph($orderby,$sectiontitle,$graphalias,$sumgraphs);
+								produceGraph($orderby,$sumgraphs,$aggregate);
 								$metrics=array();
 								$i=0;
 							}	
@@ -836,7 +860,7 @@ printTimer('postFetch');
 						if ( $aggregate ) {
 						echo "is we here<br>";
 							//input here if we're summing is $firstseries/$secondseries, not metrics.
-							produceGraph($orderby,$sectiontitle,$graphalias,$sumgraphs);
+							produceGraph($orderby,$sumgraphs,$aggregate);
 							$metrics=array();
 						}					
 					
@@ -866,10 +890,10 @@ $debuggraph=false;
 
 
 
-function produceGraph($orderby,$sectiontitle,$graphalias,$sumgraphs) {
+function produceGraph($orderby,$sumgraphs,$aggregate) {
 		global $graphs, $metrics, $templatecolors, $graphtitle, $graphhost, $servicepattern, $hostpattern;
-		global $leftaxisseries, $rightaxisseries, $leftaxisalias,$rightaxisalias;
-		global $graphservice, $aggregate, $name, $colors, $COLORS;
+		global $leftaxisseries, $rightaxisseries, $leftaxisalias,$rightaxisalias,$sectiontitle,$graphalias;
+		global $graphservice, $name, $colors, $COLORS;
 //echo "calling productGraph for $name $sectiontitle - alias $graphalias<br>";
 
 		if (! isset($graphs) )
@@ -886,17 +910,34 @@ function produceGraph($orderby,$sectiontitle,$graphalias,$sumgraphs) {
 						}
 		
 						if ( !empty($sumgraphs) ) {
-
-							if ( $orderby === "host" ) {
-								$graphtitle = $sectiontitle . " - $graphhost";
-								$graphalias = $servicepattern;
-		
-							} elseif ( $orderby === "service" ) { 
-								$graphtitle = $sectiontitle . " - $graphservice";
-								$graphalias = $hostpattern;
-							} else {
-								echo "4unknown groupby $orderby";
-								return 1;
+							//we ARE summing AND aggregating
+							if ( $aggregate) {
+					echo "sum and agg<br<>";
+								if ( $orderby === "host" ) {
+									$graphtitle = $sectiontitle . " - $graphhost";
+									$graphalias = $servicepattern;
+			
+								} elseif ( $orderby === "service" ) { 
+									$graphtitle = $sectiontitle . " - $graphservice";
+									$graphalias = $hostpattern;
+								} else {
+									echo "4unknown groupby $orderby";
+									return 1;
+								}
+							} else { 
+					echo "summ only<br>";
+								// summing but NOT aggregating
+								if ( $orderby === "host" ) {
+									$graphtitle = $sectiontitle . " - $graphhost";
+//									$graphalias = $servicepattern;
+			
+								} elseif ( $orderby === "service" ) { 
+									$graphtitle = $sectiontitle . " - $graphservice";
+//									$graphalias = $hostpattern;
+								} else {
+									echo "4unknown groupby $orderby";
+									return 1;
+								}
 							}
 		
 		

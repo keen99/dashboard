@@ -70,28 +70,29 @@ $graphTemplate['test template bypass'] = array(
 
 //createGraphsFromTemplates("test template bypass", "service");
 
+//1
 //  group by service, each service and each host on it's own graph - err/count split
 //createGraphsFromTemplatesHack("test template bypass", "service", false, false);
+//2
 //  group by service, aggregate each service (all hosts) onto one graph
 //createGraphsFromTemplatesHack("test template bypass", "service", false, true);
+//5
+//  group by service, each service and each host on it's own graph - err/count combined and sum
+//createGraphsFromTemplatesHack("test template bypass", "service", true, false);
+//6
+//  group by service, aggregate each service (all hosts) onto one graph and sum
+//createGraphsFromTemplatesHack("test template bypass", "service", true, true);
 
-//  group by host, each service and each host on it's own graph
+//3
+//  group by host, each service and each host on it's own graph - split err/count
 //createGraphsFromTemplatesHack("test template bypass", "host", false, false);
+//4
 //  group by host, aggregate each host (all services) onto one graph
 //createGraphsFromTemplatesHack("test template bypass", "host", false, true);
-
-// now sum...
-//  group by service, each service and each host on it's own graph - err/count split
-// one line per service and per host - broken alias	
-createGraphsFromTemplatesHack("test template bypass", "service", true, false);
-//^same as but got both errrs and counts on the same graph...
-//createGraphsFromTemplatesHack("test template bypass", "service", false, false);
-//createGraphsFromTemplatesHack("test template bypass", "service", true, true);
-
-//  group by service, aggregate each service (all hosts) onto one graph
-//createGraphsFromTemplatesHack("test template bypass", "service", true, true);
-//  group by host, each service and each host on it's own graph
+//7
+//  group by host, each service and each host on it's own graph - combined errr/count
 //createGraphsFromTemplatesHack("test template bypass", "host", true, false);
+//8
 //  group by host, aggregate each host (all services) onto one graph
 //createGraphsFromTemplatesHack("test template bypass", "host", true, true);
 
