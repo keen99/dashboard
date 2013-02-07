@@ -8,7 +8,7 @@ startTimer();
 /** the title used for the page */
 $title = 'kiwi rpcs';
 $namespace="";
-
+/*
 addGraphTemplate(
 	"kiwirpcs", 
 	"kiwi rpc counts", 
@@ -17,7 +17,8 @@ addGraphTemplate(
 	"(rpc.*)",
 	"(count\.counters\.count)"
 );
-
+*/
+/*
 addGraphTemplate(
 	"kiwirpcsduration", 
 	"kiwi rpc duration avg", 
@@ -26,8 +27,7 @@ addGraphTemplate(
 	"(rpc.*)",
 	"(duration\.avg\.counters\.count)"
 );
-
-
+*/
 
 //createGraphsFromTemplatesAggregate("kiwirpcs", "host");
 //createGraphsFromTemplatesAggregate("kiwirpcs", "service");
@@ -42,7 +42,7 @@ $graphTemplate['test template bypass'] = array(
 		'sectiontitle' => 'kiwi rpc test counters',
 		'prefixpattern' => '(^statsd)',
 		'hostpattern' => '(.*app.*)\.kiwi',	
-//		'servicepattern' => '(rpc\..*)',
+		'servicepattern' => '(rpc\..*)',
 //		'servicepattern' => '(rpc\..*errors|rpc\..*count)',
 //		'servicepattern' => '(rpc\.blaze\.post\..*)',
 		'suffixpattern' => '(errors\.counters\.count|count\.counters\.count)'
@@ -54,7 +54,7 @@ $graphTemplate['test template bypass'] = array(
 		,'rightaxisalias' => 'errors'
 		,'rightaxisfunctions' => 'keepLastValue'
 //		,'servicepattern' => '(rpc\.blaze\..*)'	
-		,'servicepattern' => '(rpc\.auction\..*)'	
+//		,'servicepattern' => '(rpc\.auction\..*)'	
 //		,'leftaxispattern' => '(rpc\.blaze\.post\.count)	
 //		,'rightaxispattern' => '(rpc\.blaze\.post\.errors)'	
 //		,'suffixpattern' => '([e,c].*\.counters\.count)'
@@ -65,51 +65,32 @@ $graphTemplate['test template bypass'] = array(
 
 
 
-
-//createGraphsFromTemplates("test template bypass", "service");
-
-//createGraphsFromTemplates("test template bypass", "service");
-
 //1
 //  group by service, each service and each host on it's own graph - err/count split
-//createGraphsFromTemplatesHack("test template bypass", "service", false, false);
+//createGraphsFromTemplates("test template bypass", "service", false, false);
 //2
 //  group by service, aggregate each service (all hosts) onto one graph
-//createGraphsFromTemplatesHack("test template bypass", "service", false, true);
+//createGraphsFromTemplates("test template bypass", "service", false, true);
 //5
 //  group by service, each service and each host on it's own graph - err/count combined and sum
-//createGraphsFromTemplatesHack("test template bypass", "service", true, false);
+//createGraphsFromTemplates("test template bypass", "service", true, false);
 //6
 //  group by service, aggregate each service (all hosts) onto one graph and sum
-//createGraphsFromTemplatesHack("test template bypass", "service", true, true);
-
+//createGraphsFromTemplates("test template bypass", "service", true, true);
 //3
 //  group by host, each service and each host on it's own graph - split err/count
-//createGraphsFromTemplatesHack("test template bypass", "host", false, false);
-//4
+//createGraphsFromTemplates("test template bypass", "host", false, false);
+//4 -- too large w/ all rpcs
 //  group by host, aggregate each host (all services) onto one graph
-//createGraphsFromTemplatesHack("test template bypass", "host", false, true);
+//createGraphsFromTemplates("test template bypass", "host", false, true);
 //7
 //  group by host, each service and each host on it's own graph - combined errr/count
-//createGraphsFromTemplatesHack("test template bypass", "host", true, false);
+//createGraphsFromTemplates("test template bypass", "host", true, false);
 //8
 //  group by host, aggregate each host (all services) onto one graph
-//createGraphsFromTemplatesHack("test template bypass", "host", true, true);
+createGraphsFromTemplates("test template bypass", "host", true, true);
 
 
-
-
-//createGraphsFromTemplates("test template bypass", "host");
-
-//createGraphsFromTemplatesAggregate("test template bypass", "service");
-//createGraphsFromTemplatesAggregate("test template bypass", "host", true);
-//createGraphsFromTemplatesAggregate("test template bypass", "host");
-
-//createGraphsFromTemplatesAggregate("test template bypass", "service", true);
-
-//createGraphsFromTemplatesAggregate("test template bypass", "host");
-//createGraphsFromTemplates("test template bypass", "host");
-//createGraphsFromTemplates("test template bypass", "service");
 
 
 
@@ -124,15 +105,9 @@ $graphTemplate['test template bypass2'] = array(
 //		'rightaxispattern' => '(rpc\.blaze\.post\.errors)',		
 		'suffixpattern' => '(counters\.count)'
 );
-//createGraphsFromTemplatesAggregate("test template bypass2", "service");
 
 
 
-
-//createGraphsFromTemplates("kiwirpcs", "host");
-//createGraphsFromTemplates("kiwirpcs", "service");
-
-//createGraphsFromTemplates("kiwitest");
 
 
 
