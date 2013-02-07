@@ -1,6 +1,7 @@
 <?php
 
 require_once "phplib/globals.php";
+require_once "easod/wildcard-pattern-creator.php";
 
 
 // setup stuff
@@ -439,8 +440,6 @@ function produceGraph($orderby,$sumgraphs,$aggregate) {
 								}
 							}
 		
-		
-					
 							if ( !empty($leftaxisseries) ) {
 
 								$ourgraphalias = $graphalias . " - " . $leftaxisalias;
@@ -458,6 +457,7 @@ function produceGraph($orderby,$sumgraphs,$aggregate) {
 		//we should probably hide the first axis, or only put the second on the second if there wasn't a first...
 		// requires new graphite feature though
 							if ( !empty($rightaxisseries) ) {
+
 								$ourgraphalias = $graphalias . " - " . $rightaxisalias;
 								$metricprefix = "";
 								$metricsuffix = "";

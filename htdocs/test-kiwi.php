@@ -37,11 +37,16 @@ addGraphTemplate(
 //createGraphsFromTemplatesAggregate("kiwirpcsduration", "host");
 
 
-$graphTemplate['kiwiallrpccounts'] = array(
-		'sectiontitle' => 'kiwi all rpc counts'
+$graphTemplate['test template bypass'] = array(
+		'type' => 'graphite'
+		,'sectiontitle' => 'kiwi rpc test counters'
 		,'prefixpattern' => '(^statsd)'
 		,'hostpattern' => '(.*app.*)\.kiwi'
 		,'servicepattern' => '(rpc\..*)'
+		//,'servicepattern' => '(rpc\..*errors|rpc\..*count)'  //this shouldnt and doesnt work
+//		'servicepattern' => '(rpc\.blaze\.post\..*)'
+//		,'servicepattern' => '(rpc\.blaze\..*)'	
+//		,'servicepattern' => '(rpc\.auction\..*)'	
 		,'suffixpattern' => '(errors\.counters\.count|count\.counters\.count)'
 
 		,'leftaxispattern' => '(rpc\..*\.count)'
@@ -50,63 +55,51 @@ $graphTemplate['kiwiallrpccounts'] = array(
 		,'rightaxispattern' => '(rpc\..*\.errors)'
 		,'rightaxisalias' => 'errors'
 // so we probably will need some specific logic around stacks, wen we can'cant use them
-//		,'rightaxisfunctions' => 'secondYAxis,stacked,keepLastValue'
-		,'rightaxisfunctions' => 'stacked,keepLastValue'		
+		,'rightaxisfunctions' => 'secondYAxis,stacked,keepLastValue'
+	,'rightaxisfunctions' => 'stacked,keepLastValue'
+
+
+//		,'leftaxispattern' => '(rpc\.blaze\.post\.count)	
+//		,'rightaxispattern' => '(rpc\.blaze\.post\.errors)'	
+//		,'suffixpattern' => '([e,c].*\.counters\.count)'
+//		,'colors' => array('red', 'yellow', 'olive')
+
+		
 );
 
-
-
-$graphTemplate['kiwiallrpcduration'] = array(
-		'sectiontitle' => 'kiwi all rpc durations'
-		,'prefixpattern' => '(^statsd)'
-		,'hostpattern' => '(.*app.*)\.kiwi'
-		,'servicepattern' => '(rpc\..*)'
-//		,'suffixpattern' => '(errors\.counters\.count|count\.counters\.count)'
-		,'suffixpattern' => '(duration\.avg\.counters\.count|duration\.max\.counters\.count)'
-
-
-		,'leftaxispattern' => '(rpc\..*\.duration.avg)'
-		,'leftaxisalias' => 'avg'
-		,'leftaxisfunctions' => 'keepLastValue'
-		,'rightaxispattern' => '(rpc\..*\.duration.max)'
-		,'rightaxisalias' => 'max'
-		,'rightaxisfunctions' => 'keepLastValue'		
-);
-
-createGraphsFromTemplates("kiwiallrpcduration", "service", true, true);
 
 
 //1
 //  group by service, each service and each host on it's own graph - err/count split
-//createGraphsFromTemplates("kiwiallrpccounts", "service", false, false);
+//createGraphsFromTemplates("test template bypass", "service", false, false);
 //5
 //  group by service, each service and each host on it's own graph - err/count combined and sum
-//createGraphsFromTemplates("kiwiallrpccounts", "service", true, false);
+//createGraphsFromTemplates("test template bypass", "service", true, false);
 //2
 //  group by service, aggregate each service (all hosts) onto one graph
-//createGraphsFromTemplates("kiwiallrpccounts", "service", false, true);
+//createGraphsFromTemplates("test template bypass", "service", false, true);
 //6
 //  group by service, aggregate each service (all hosts) onto one graph and sum
-//createGraphsFromTemplates("kiwiallrpccounts", "service", true, true);
+//createGraphsFromTemplates("test template bypass", "service", true, true);
 //3
 //  group by host, each service and each host on it's own graph - split err/count
-//createGraphsFromTemplates("kiwiallrpccounts", "host", false, false);
+//createGraphsFromTemplates("test template bypass", "host", false, false);
 //4 -- too large w/ all rpcs
 //  group by host, aggregate each host (all services) onto one graph
-//createGraphsFromTemplates("kiwiallrpccounts", "host", false, true);
+//createGraphsFromTemplates("test template bypass", "host", false, true);
 //7
 //  group by host, each service and each host on it's own graph - combined errr/count
-//createGraphsFromTemplates("kiwiallrpccounts", "host", true, false);
+//createGraphsFromTemplates("test template bypass", "host", true, false);
 //8
 //  group by host, aggregate each host (all services) onto one graph
-//createGraphsFromTemplates("kiwiallrpccounts", "host", true, true);
+createGraphsFromTemplates("test template bypass", "host", true, true);
 
 
 
 
 
 
-$graphTemplate['kiwiallrpccounts2'] = array(
+$graphTemplate['test template bypass2'] = array(
 		'type' => 'graphite',
 		'sectiontitle' => 'kiwi rpc test counters',
 		'prefixpattern' => '(^statsd)',
