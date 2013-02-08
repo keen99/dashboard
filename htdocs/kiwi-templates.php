@@ -10,6 +10,9 @@ $title = 'kiwi rpcs';
 $namespace="";
 
 
+$tabs = Local_Dashboard::$KIWI_TABS;
+$tab_url = Dashboard::getTabUrl(__FILE__);
+
 $graphTemplate['kiwiallrpccounts'] = array(
 		'sectiontitle' => 'kiwi all rpc counts'
 		,'prefixpattern' => '(^statsd)'

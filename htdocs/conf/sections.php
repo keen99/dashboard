@@ -5,10 +5,7 @@ require_once('conf/dashboards.php');
 $sections = array(
 
 	'Kiwi' => array ( 
-		' Live ' => array (
-			'all rpcs, count' => 'kiwi-count.php?m=1&time=1d',
-			'all rpcs, duration' => 'kiwi-duration.php?m=1&time=1d',
-		 ),
+        ' Live ' => Local_Dashboard::$KIWI_TABS,
 	),
 /*
     'My shtuf' => array(

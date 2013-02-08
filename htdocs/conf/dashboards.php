@@ -10,6 +10,12 @@ class Local_Dashboard {
      * external sites too! Want to add a link to the Hadoop DFS page? Easy!
      */
 
+    public static $KIWI_TABS = array(
+                        'all rpcs, count' => 'kiwi-count.php?m=1&time=1d',
+                        'all rpcs, duration' => 'kiwi-duration.php?m=1&time=1d',
+    );  
+
+
     public static $STUFF_TABS = array(
         'cacti' => 'testtab.php',
         'graphite' => 'testgraphite.php',
