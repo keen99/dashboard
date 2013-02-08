@@ -33,15 +33,15 @@ $COLORS = array(
       'plum' 				 ,
       'tan' 				 ,
         'wheat' 			,
+        'red' 				 ,
         'thistle' 			,
-        'rosy-brown' 		,
 //        'midnight-blue' 	,
 //      'blue' 				 ,
-        'red' 				 ,
         'pink' 				 ,
 //        'black' 			,
-        'yellow-green' 		,
+        'rosy-brown' 		,
         'lightsteelblue' 	,
+        'yellow-green' 		,
         'steelblue' 		,
 );
     
