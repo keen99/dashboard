@@ -3,7 +3,7 @@ require_once 'phplib/Dashboard.php';
 require_once 'easod/functions.php';
 
 
-startTimer();
+//startTimer();
 
 /** the title used for the page */
 $title = 'kiwi rpcs';
@@ -62,10 +62,10 @@ $graphTemplate['test template bypass'] = array(
 //createGraphsFromTemplates("test template bypass", "host", false, true);
 //7
 //  group by host, each service and each host on it's own graph - combined errr/count
-//createGraphsFromTemplates("test template bypass", "host", true, false);
+createGraphsFromTemplates("test template bypass", "host", true, false);
 //8
 //  group by host, aggregate each host (all services) onto one graph
-createGraphsFromTemplates("test template bypass", "host", true, true);
+//createGraphsFromTemplates("test template bypass", "host", true, true);
 
 
 // adds another input under the deploys inputs...
@@ -79,8 +79,84 @@ foreach ($_GET as $key => $value) {
     $additional_controls .= "<input type='hidden' name='$key' value='$value'/>";
 }
 
+//this sets up a tab-navigation between pages.  also adds an "up to home" link
 $tabs = Local_Dashboard::$KIWI_TABS;
 $tab_url = Dashboard::getTabUrl(__FILE__);
+
+// and adds html to the header
+//$html_for_header=...
+
+//extra body html after all the graphs
+//$additional_html="this is cool shtuff here<br>";
+
+function generateBox($graphs) {
+
+	$graphcount=0;
+	$sectioncount=0;
+	$boxes="";
+	while ($section = current($graphs) ){ 
+		//this is our section header
+		$sectionkey=key($graphs);
+		$boxes.="<a href=#". preg_replace("/[^a-z0-9]/", "", strtolower($sectionkey)) . ">$sectionkey</a><br>";
+		$sectioncount++;
+		while ($graph = current($graphs[$sectionkey]) ){ 		
+			//this is our graph itself
+//dont show these yet
+//			$graphkey=key($graphs[$sectionkey]);
+			//$boxes.="<a href=#". preg_replace("/[^a-z0-9]/", "", strtolower($graphkey) . ">$graphkey</a><br>";
+
+			$graphcount++;
+		next($graphs[$sectionkey]);
+		}		
+
+		next($graphs);
+	}
+
+	$boxcontent="<b>Sections: $sectioncount</b><br>";	
+	$boxcontent.="<b>Graphs: $graphcount</b><hr>";	
+	$boxcontent.=$boxes;
+	return $boxcontent;
+};
+
+//echo generateBox($graphs);
+
+//exit;
+
+
+$html_for_header='
+<div id=menu style="background-color:#FFD700;
+	width:10%;
+	height:auto;
+	font-size:10px;
+	float: left;">' . generateBox($graphs) . '
+</div>
+<div id=frame style="width:90%;"">
+';
+
+
+
+
+
+/*
+echo "\n\n";
+echo '<div id="frame" class=menu style="background-color:#FFD700;width:100px;float:left;">';
+echo "lets try another box";
+echo "/div>";
+*/
+
+/*
+//it's a messagey box - full width
+echo "<div class=notice>";
+echo "notice is here<br>";
+echo "</div>";
+
+//more of a section header, but just lands at the top...
+echo "<div class=section>";
+echo "section is here<br>";
+echo "</div>";
+
+*/
+
 
 
  printTimer('pre template');

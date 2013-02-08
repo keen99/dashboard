@@ -39,6 +39,7 @@ if (isset($graphs)){
 <?php if (isset($html_for_header)) { print $html_for_header; } ?>
 
 <div id="frame">
+
     <?= GraphFactory::getInstance()->getDashboardSectionsHTML($graphs,
                                                               $time,
                                                               $show_deploys); ?>
