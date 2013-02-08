@@ -1,7 +1,8 @@
 <?php
 
-require_once('globals.php');
+ini_set('display_errors', true);
 
+require_once('globals.php');
 
 require_once('Controls.php');
 require_once('DeployConstants.php');
@@ -19,7 +20,6 @@ require_once('Graph/NewRelic.php');
 require_once('SplunkUtils.php');
 require_once('Tabs.php');
 require_once('TimingUtils.php');
-
 
 class Dashboard {
 

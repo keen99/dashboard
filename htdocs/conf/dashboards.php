@@ -1,6 +1,6 @@
 <?php
 
-class Local_Dashboard extends Dashboard {
+class Local_Dashboard {
 
     /** The $..._TABS arrays define which tabs are shown at the tops of various 
      * pages. They also control what is shown on the index page.
@@ -9,6 +9,11 @@ class Local_Dashboard extends Dashboard {
      * URLs don't have to redirect to other dashboard pages, use them to go to 
      * external sites too! Want to add a link to the Hadoop DFS page? Easy!
      */
+
+    public static $STUFF_TABS = array(
+        'cacti' => 'testtab.php',
+        'graphite' => 'testgraphite.php',
+    ); 
 
     public static $DB_TABS = array(
         'PGBouncer' => 'example_pgbouncer.php',

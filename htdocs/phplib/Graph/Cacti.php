@@ -40,8 +40,8 @@ class Graph_Cacti {
         $p['rra_id'] = $this->metrics[0]['rra_id'];
         $p['graph_start'] = $this->timeToSeconds($this->time);
         $p['graph_end'] = isset($this->until_time) ? $this->timeToSeconds($this->until_time) : time();
-        return 'http://' . $cacti_server . '/cacti/graph_image.php?'
-               . http_build_query($p);
+        return 'https://' . $cacti_server . '/cacti/graph_image.php?'
+               . http_build_query($p) . '&graph_nolegend=true';
     }
 
     public function getPageURL() {
@@ -50,7 +50,7 @@ class Graph_Cacti {
         $p['local_graph_id'] = $this->metrics[0]['graph_id'];
         $p['rra_id'] = 'all';
         $p['action'] = 'view';
-        return 'http://' . $cacti_server . '/cacti/graph.php?'
+        return 'https://' . $cacti_server . '/cacti/graph.php?'
                . http_build_query($p);
     }
 

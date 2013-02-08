@@ -14,4 +14,5 @@ class GraphConstants {
     const SHORT_HEIGHT = 80;
     const PIE_CHART_HEIGHT = 240;
     const FULL_HEIGHT = 400;
+
 }
