@@ -3,6 +3,8 @@
 ini_set('display_errors', true);
 
 require_once('globals.php');
+require_once('conf/dashboards.php');
+
 
 require_once('Controls.php');
 require_once('DeployConstants.php');
