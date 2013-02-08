@@ -60,17 +60,19 @@ function startTimer() {
 
 function printTimer($prefix='Timer') {
 	global $starttime, $lasttime;
-  $mtime = microtime(); 
-  $mtime = explode(" ", $mtime);
-  $mtime = $mtime[1] + $mtime[0]; 
-  $endtime = $mtime; 
-  $totaltime = ($endtime - $starttime); 
-  $spenttime = ($endtime - $lasttime); 
-  echo $prefix . ' Elapsed time: ' .$totaltime. ' seconds, ' . $spenttime . ' since last time<br>';
-  flush();
-  ob_flush();
-  $lasttime = $mtime;
-
+	if (!empty($starttime)) {
+		
+		$mtime = microtime(); 
+		$mtime = explode(" ", $mtime);
+		$mtime = $mtime[1] + $mtime[0]; 
+		$endtime = $mtime; 
+		$totaltime = ($endtime - $starttime); 
+		$spenttime = ($endtime - $lasttime); 
+		echo $prefix . ' Elapsed time: ' .$totaltime. ' seconds, ' . $spenttime . ' since last time<br>';
+		flush();
+		ob_flush();
+		$lasttime = $mtime;
+	}
 }
 
 function fetchGraphiteData() {
