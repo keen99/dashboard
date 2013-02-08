@@ -3,7 +3,7 @@
 // the title used for the page
 $title = 'Hadoop: Jobs Detail';
 
-require_once 'phplib/Dashboard.php';
+require_once '../phplib/Dashboard.php';
 
 $jobtracker_overview[] = array(
     'type' => 'ganglia',
@@ -98,7 +98,7 @@ $graphs = array(
     'TaskTracker Status' => $tasktracker_graphs,
 );
 
-$tabs = Dashboard::$HADOOP_TABS;
+$tabs = Local_Dashboard::$HADOOP_TABS;
 $tab_url = Dashboard::getTabUrl(__FILE__);
 
 include 'phplib/template.php';

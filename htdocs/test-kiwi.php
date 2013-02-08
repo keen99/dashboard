@@ -8,33 +8,6 @@ startTimer();
 /** the title used for the page */
 $title = 'kiwi rpcs';
 $namespace="";
-/*
-addGraphTemplate(
-	"kiwirpcs", 
-	"kiwi rpc counts", 
-	"(^statsd)",
-	"(.*.*)\.kiwi",
-	"(rpc.*)",
-	"(count\.counters\.count)"
-);
-*/
-/*
-addGraphTemplate(
-	"kiwirpcsduration", 
-	"kiwi rpc duration avg", 
-	"(^statsd)",
-	"(.*.*)\.kiwi",
-	"(rpc.*)",
-	"(duration\.avg\.counters\.count)"
-);
-*/
-
-//createGraphsFromTemplatesAggregate("kiwirpcs", "host");
-//createGraphsFromTemplatesAggregate("kiwirpcs", "service");
-
-//createGraphsFromTemplatesAggregate("kiwirpcs", "service");
-//createGraphsFromTemplatesAggregate("kiwirpcsduration", "service");
-//createGraphsFromTemplatesAggregate("kiwirpcsduration", "host");
 
 
 $graphTemplate['test template bypass'] = array(
@@ -95,24 +68,19 @@ $graphTemplate['test template bypass'] = array(
 createGraphsFromTemplates("test template bypass", "host", true, true);
 
 
+// adds another input under the deploys inputs...
+//$additional_controls="<input type='checkbox' name='hype_deploys' value='true'/><label>Hype All Deploys</label>";
 
+//$hide_deploys=true;
 
+$additional_controls="";
+//this isn't really good enough to carry stuff forward, we need to limit it so it doesn't goet longer and longer and longer
+foreach ($_GET as $key => $value) {
+    $additional_controls .= "<input type='hidden' name='$key' value='$value'/>";
+}
 
-
-$graphTemplate['test template bypass2'] = array(
-		'type' => 'graphite',
-		'sectiontitle' => 'kiwi rpc test counters',
-		'prefixpattern' => '(^statsd)',
-		'hostpattern' => '(.*app00)\.kiwi',	
-		'servicepattern' => '(rpc\..*blaze.*\.[errors,count]\.counters)',		
-//		'leftaxispattern' => '(rpc\.blaze\.post\.count)',		
-//		'rightaxispattern' => '(rpc\.blaze\.post\.errors)',		
-		'suffixpattern' => '(counters\.count)'
-);
-
-
-
-
+$tabs = Local_Dashboard::$KIWI_TABS;
+$tab_url = Dashboard::getTabUrl(__FILE__);
 
 
  printTimer('pre template');

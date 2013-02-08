@@ -20,7 +20,7 @@ $time = !empty($_GET['time']) ? $_GET['time'] : "1h";
 <div id="status"></div>
 
 <?php
-$tabs = Dashboard::$DB_TABS;
+$tabs = Local_Dashboard::$DB_TABS;
 $tab_url = Dashboard::getTabUrl(__FILE__);
 include 'phplib/template_tabs.php';
 ?>

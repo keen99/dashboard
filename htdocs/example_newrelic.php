@@ -60,7 +60,7 @@ $graphs = array(
     ),
 );
 
-$tabs = Dashboard::$DEPLOY_TABS;
+$tabs = Local_Dashboard::$DEPLOY_TABS;
 $tab_url = Dashboard::getTabUrl(__FILE__);
 
 include 'phplib/template.php';

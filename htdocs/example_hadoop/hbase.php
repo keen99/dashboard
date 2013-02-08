@@ -3,7 +3,7 @@
 // the title used for the page
 $title = 'Hadoop: Hbase Detail';
 
-require_once 'phplib/Dashboard.php';
+require_once '../phplib/Dashboard.php';
 
 $overview_graphs[] = array(
     'type' => 'ganglia',
@@ -110,7 +110,7 @@ $graphs = array(
     'Sizes' => $size_graphs,
 );
 
-$tabs = Dashboard::$HADOOP_TABS;
+$tabs = Local_Dashboard::$HADOOP_TABS;
 $tab_url = Dashboard::getTabUrl(__FILE__);
 
 include 'phplib/template.php';

@@ -6,6 +6,8 @@ if (!isset($until)) {
 }
 ?>
 <form id="controls" class='controls' action="<?= $_SERVER['PHP_SELF'] ?>">
+<!-- <form id="controls" class='controls' action="?"> -->
+
     <div class="controls-wrapper">
         <div class="controls-inner">
             <input type="hidden" name="m" value="1"/>

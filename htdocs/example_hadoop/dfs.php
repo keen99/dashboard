@@ -3,7 +3,7 @@
 /** the title used for the page */
 $title = 'Hadoop: DFS Detail';
 
-require_once 'phplib/Dashboard.php';
+require_once '../phplib/Dashboard.php';
 
 $filesystem_graphs[] = array(
     'type' => 'ganglia',
@@ -81,7 +81,7 @@ $graphs = array(
     'Datanode Status' => $datanode_graphs,
 );
 
-$tabs = Dashboard::$HADOOP_TABS;
+$tabs = Local_Dashboard::$HADOOP_TABS;
 $tab_url = Dashboard::getTabUrl(__FILE__);
 
-include 'phplib/template.php';
+include '../phplib/template.php';

@@ -49,7 +49,7 @@ $graphs = array(
 
 $additional_controls = "<input type=\"hidden\" name=\"host\" value=\"$host\">";
 
-$tabs = Dashboard::$NETWORK_TABS;
+$tabs = Local_Dashboard::$NETWORK_TABS;
 $tab_url = Dashboard::getTabUrl(__FILE__);
 
 include "phplib/template.php";

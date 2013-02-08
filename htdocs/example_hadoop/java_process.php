@@ -3,7 +3,7 @@
 // the title used for the page
 $title = 'Hadoop: Java Processes';
 
-require_once 'phplib/Dashboard.php';
+require_once '../phplib/Dashboard.php';
 
 $want_graphs = array("gcCount", "gcTimeMillis", "logError", "logWarn", "memHeapCommittedM", "memHeapUsedM", "memNonHeapCommittedM", "memNonHeapUsedM");
 foreach ($want_graphs as $thisgraph) {
@@ -76,7 +76,7 @@ $graphs = array(
     'Namenode JVM Metrics' => $namenode_graphs,
 );
 
-$tabs = Dashboard::$HADOOP_TABS;
+$tabs = Local_Dashboard::$HADOOP_TABS;
 $tab_url = Dashboard::getTabUrl(__FILE__);
 
 include 'phplib/template.php';

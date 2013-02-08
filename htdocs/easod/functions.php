@@ -535,7 +535,7 @@ function produceGraph($orderby,$sumgraphs,$aggregate) {
 								'show_copy_url' => 0,
 					//			'height' => '120',
 								'colors' => $colors,
-					//			'width' => '200',
+					//			'width' => '435',
 					//			'area_mode' => 'first',
 					//			'line_mode' => 'connected',
 					//			'line_mode' => 'slope',

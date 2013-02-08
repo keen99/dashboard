@@ -1,6 +1,12 @@
 <?php
 
 ini_set('display_errors', true);
+<<<<<<< HEAD
+=======
+
+require_once('globals.php');
+require_once('conf/dashboards.php');
+>>>>>>> origin/d/top4
 
 require_once('globals.php');
 
