@@ -5,14 +5,8 @@ require_once 'easod/functions.php';
 
 //startTimer();
 
-/** the title used for the page */
-$title = 'kiwi rpcs';
-$namespace="";
 
 
-$graphTemplate['empty'] = array(
-	'sectiontitle' => 'PICK ONE'
-);
 
 
 $graphTemplate['test template bypass'] = array(
@@ -84,63 +78,6 @@ $graphTemplate['kiwiallrpcduration'] = array(
 );
 
 
-$additional_controls="";
-//this isn't really good enough to carry stuff forward, we need to limit it so it doesn't goet longer and longer and longer
-//foreach ($_GET as $key => $value) {
-//    $additional_controls .= "<input type='hidden' name='$key' value='$value'/>";
-//}
-
-//$additional_controls .= "<input type='checkbox' name='whichgraph' value='0' />";
-$additional_controls .= "<span class='control'>";
-//default to service
-if ( !isset($_GET['groupby']) ) { $_GET['groupby'] = 'service'; }
-$additional_controls .= Controls::buildRadio('groupby', 'Group By', array('service' => 'Service' , 'host' => 'Host'), $_GET['groupby'] );
-$additional_controls .= "</span><span class='control'>";
-if (! isset($_GET['sum']) ) { $_GET['sum'] = 0; }
-$additional_controls .= Controls::buildCheckbox('sum', 'Sum Items', $_GET['sum'] );
-if (! isset($_GET['agg']) ) { $_GET['agg'] = 0; }
-$additional_controls .= Controls::buildCheckbox('agg', 'Aggregate', $_GET['agg'] );
-$additional_controls .= '</span>';
-$additional_controls .= "<span class='control'>";
-
-
-if ( !isset($_GET['graphtemplate']) ) {
-	$_GET['graphtemplate'] = 'empty';
-}
-
-if ( $_GET['graphtemplate'] === 'empty' ) {
-
-	echo '<div class=notice>please choose a graph template<br></div>';
-	$graphs=array();
-} else {
-	createGraphsFromTemplates($_GET['graphtemplate'], $_GET['groupby'], $_GET['sum'], $_GET['agg']);
-
-}
-
-//$additional_controls .= Controls::buildSelect('selectfun', 'select one fun', array('service' => 'Service' , 'host' => 'Host'), $_GET['elected'] );
-foreach ( $graphTemplate as $key => $value) { $graphTemplates[$key] = $value['sectiontitle'];	}
-$additional_controls .= Controls::buildSelect('graphtemplate', 'Graph Template', $graphTemplates, $_GET['graphtemplate'] );
-
-
-//createGraphsFromTemplates("test template bypass", $_GET['groupby'], $_GET['sum'], $_GET['agg']);
-
-
-/*
-if ( isset($_GET['whichgraph']) ) {
-	echo "got whichgraph ".  $_GET['whichgraph'] . "<br>";
-
-}
-
-if ( isset($_GET['whichgraph']) ) {
-
-	switch($_GET['whichgraph']) {
-		case 0:
-			createGraphsFromTemplates("test template bypass", "service", false, false);
-		case 1:
-			createGraphsFromTemplates("test template bypass", "host", false, false);
-
-	}
-} else {
 
 //1
 //  group by service, each service and each host on it's own graph - err/count split
@@ -166,13 +103,24 @@ if ( isset($_GET['whichgraph']) ) {
 //8
 //  group by host, aggregate each host (all services) onto one graph
 //createGraphsFromTemplates("test template bypass", "host", true, true);
-}
-*/
 
-// adds another input under the deploys inputs...
-//$additional_controls="<input type='checkbox' name='hype_deploys' value='true'/><label>Hype All Deploys</label>";
+
 
 //$hide_deploys=true;
+
+
+
+
+
+buildTemplateDropDown();
+buildGraphOptions();
+
+if ( $_GET['graphtemplate'] === 'empty' ) {
+	echo '<div class=notice>please choose a graph template<br></div>';
+	$graphs=array();
+} else {
+	createGraphsFromTemplates($_GET['graphtemplate'], $_GET['groupby'], $_GET['sum'], $_GET['agg']);
+}
 
 
 
@@ -185,54 +133,16 @@ $tab_url = Dashboard::getTabUrl(__FILE__);
 // and adds html to the header
 //$html_for_header=...
 
+$html_for_header=generateListBox($graphs);
+
+
+/** the title used for the page */
+$title = $graphTemplate[$_GET['graphtemplate']]['sectiontitle'];
+$namespace="";
+
+
 //extra body html after all the graphs
 //$additional_html="this is cool shtuff here<br>";
-
-function generateBox($graphs) {
-
-	$graphcount=0;
-	$sectioncount=0;
-	$boxes="";
-	while ($section = current($graphs) ){ 
-		//this is our section header
-		$sectionkey=key($graphs);
-		$boxes.="<a href=#". preg_replace("/[^a-z0-9]/", "", strtolower($sectionkey)) . ">$sectionkey</a><br>";
-		$sectioncount++;
-		while ($graph = current($graphs[$sectionkey]) ){ 		
-			//this is our graph itself
-//dont show these yet we cant link to them
-//			$graphkey=key($graphs[$sectionkey]);
-//			$boxes.="<a href=#" . preg_replace("/[^a-z0-9]/", "", strtolower($graphkey)) . ">$graphkey</a><br>";
-
-			$graphcount++;
-		next($graphs[$sectionkey]);
-		}		
-
-		next($graphs);
-	}
-
-	$boxcontent="<b>Sections: $sectioncount</b><br>";	
-	$boxcontent.="<b>Graphs: $graphcount</b><hr>";	
-	$boxcontent.=$boxes;
-	$boxcontent='<div id=menu style="background-color:#fff;
-					width:10%;
-					height:auto;
-					font-size:10px;
-					float: left;">
-					' . $boxcontent . '
-					</div>
-					<div id=frame style="width:90%;"">';
-	return $boxcontent;
-};
-
-//echo generateBox($graphs);
-
-//exit;
-
-//if (!empty($graphs)) {
-$html_for_header=generateBox($graphs);
-//}
-
 
 
 
