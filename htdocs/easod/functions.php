@@ -247,36 +247,85 @@ printTimer('postFetch');
 			echo "</pre>";
 		}
 		// loop across list of services or hosts
-		// we produce a graph for each of these.
+		// we produce a SECTION for each of these.
 		foreach ($groupdata as $groupid) {
-			
+			//...unless we want an upper level agg, reset the metric counters		
+			$i=0;
+			$i=0;
+			$metrics = array();
 			$leftaxisseries="";
 			$rightaxisseries="";
-			$metrics = array();
-			$i = 0;
-	
+
+
+			//now find our list of services or hosts - we'll do a GRAPH for each of these
+			if ( $orderby === "host" ) {
+			//returns list of services
+				$graphdata=filterData($data,$prefixpattern,$hostpattern,$servicepattern,$suffixpattern,"service");
+			} elseif ( $orderby === "service" ) {
+			//returns list of hosts
+				$graphdata=filterData($data,$prefixpattern,$hostpattern,$servicepattern,$suffixpattern,"host");
+			} else {
+				echo "0unknown groupby $orderby";
+				return 1;
+			}
+			if ( $debuggraph ) {	
+				echo "<hr>";
+				echo "and now for our graphids<pre>";
+				print_r($graphdata);
+				echo "</pre>";
+			}
+
+
+		  foreach ($graphdata as $graphid) {
+
+			//now loop through our graphs...
+
+			if ( !$aggregate ) {
+			//reset to zero if we're not aggregating AND we're not summing.. - if we are, keep growing
+				$i=0;
+				$metrics = array();
+				$leftaxisseries="";
+				$rightaxisseries="";
+			}
+//echo "STARTING graphid $graphid<br>";
+
+//what do with agg and sum	
+			// find our metrics that go into this graph section - or as close as we can.
+			//constrain our data to only our group/section and our graph
 			// now identify our matches we'll use later
 			if ( $orderby === "host" ) {
-				$matches = preg_grep("/$prefixpattern\.$groupid.*\.$servicepattern\.$suffixpattern/", $data);
+				$matches = preg_grep("/$prefixpattern\.$groupid.*\.$graphid\.$suffixpattern/", $data);
 			} elseif ( $orderby === "service" ) { 
-				$matches = preg_grep("/$prefixpattern\.$hostpattern.*\.$groupid\.$suffixpattern/", $data);				
+				$matches = preg_grep("/$prefixpattern\.$graphid.*\.$groupid\.$suffixpattern/", $data);				
 			} else {
 				echo "unknown groupby $orderby";
 				return 1;
 			}
 
+
+			if ( $debuggraph ) {	
+				echo "<hr>";
+				echo "now our matches for $graphid<br>";
+				echo "<pre>";
+				print_r($matches);
+				echo "</pre>";
+			}
+
 			if ( isset($matches) && count($matches) > 0)  {
 				$matches = array_unique($matches);
-
+//THESE are are our graph LINES
 				foreach ($matches as $value) {
 					unset($graphdata);
 					preg_match("/$prefixpattern\.$hostpattern.*\.$servicepattern\.$suffixpattern/", $value, $graphdata);
-					/*
+//echo "START of foreach match for $value<Br>";
+
+					/*				
 					echo "<pre>";
 					echo "$value<br>";
 					print_r($graphdata);
 					echo "</pre>";
 					*/
+					
 					if (! isset($graphdata[0]) ) {
 						echo "we failed to set graphdata, what happened...value $value<br>";
 					}
@@ -298,24 +347,24 @@ printTimer('postFetch');
 						return 1;
 					}
 
-					if ( !empty($sumgraphs) ) {
+					if ( $sumgraphs ) {
 					// if we ARE going to sum graphs
-
-
-						
-
-					if ( !empty($rightaxispattern) && preg_match("/.*$rightaxispattern.*/", $value) ) {
+						if ( !empty($rightaxispattern) && preg_match("/.*$rightaxispattern.*/", $value) ) {
 							if (! empty($rightaxisseries) ) 
 								$rightaxisseries .= ",";
 							$rightaxisseries .= $value ;
-echo "right series: $rightaxisseries<br>";
-						} else {
+//echo "---right series: $rightaxisseries<br>";
+						} elseif ( !empty($leftaxispattern) && preg_match("/.*$leftaxispattern.*/", $value) ) {
 							if (! empty($leftaxisseries) ) 
 								$leftaxisseries .= ",";
 							$leftaxisseries .= $value;
-echo "left series: $leftaxisseries<br>";
+//echo "---left series: $leftaxisseries<br>";
 //need magic for this
 //							$leftaxisseries .= "keepLastValue(" . $value . ")";
+							 
+						} else {
+								echo "HELP we didn't match a pattern - $value<br>";
+						
 						}
 					} else { 
 					// we're not summing
@@ -333,7 +382,9 @@ echo "left series: $leftaxisseries<br>";
 							}
 //							$metrics[$i] = "cactiStyle(alias(secondYAxis(" . $metricprefix . $value . $metricsuffix . "), \"$graphalias\"))";
 							$metrics[$i] = "cactiStyle(alias(" . $metricprefix . $value . $metricsuffix . ", \"$graphalias\"))";
-						} else {
+						} elseif ( !empty($leftaxispattern) && preg_match("/.*$leftaxispattern.*/", $value) ) {
+
+//dont forgetme
 							if ( !empty($leftaxisalias) ) 
 								$graphalias = $graphalias . " - " . $leftaxisalias;
 							$metricprefix = "";
@@ -345,37 +396,73 @@ echo "left series: $leftaxisseries<br>";
 								}	
 							}
 							$metrics[$i] = "cactiStyle(alias(" . $metricprefix . $value . $metricsuffix . ", \"$graphalias\"))";
+						} else {
+								echo "HELP we didn't match a pattern - $value<br>";								
 						}
 					  
 					}
 					$i++;
 
+	
 					//if we're not aggregating, spit out a graph here
-					if ( !$aggregate) {
+//graph per metric
+//					if ( !$aggregate ) {
+					if ( !$aggregate && !$sumgraphs) {
+//echo "one graph per metric, go<br>";
 						produceGraph($orderby,$sumgraphs,$aggregate);
 						$metrics=array();
 						$i=0;
-					}	
+					}
+	
+//				echo "END of foreach match for $value, is is $i<Br>";
+// 				echo "end foreach metrics are <Br>";
+// 				echo "<pre>";
+// 				print_R($metrics);
+// 				echo "</pre>";
+				} //end foreach lines matches
+//when we sum
+//we dont use "metrics"
+//we use series
+				if ( !$aggregate && $sumgraphs) {
+//				echo "one graph per set of metrics, go<br>";
+//echo "series are<br>";
+//echo "left $leftaxisseries<br>";
+//echo "right $rightaxisseries<r>";
+					produceGraph($orderby,$sumgraphs,$aggregate);
+				}
 
-				} //end foreach matches
-
+/*				
+	echo "metrics are <Br>";
+	echo "<pre>";
+	print_R($metrics);
+	echo "</pre>";
+*/
+		
+			
+			} else {
+				//it's actually valid to sometimes not find matches
 				/*
-				echo "metrics are <Br>";
+				echo "ERROR: found no matches $graphid<br>";
 				echo "<pre>";
-				print_R($metrics);
+				print_r($matches);
 				echo "</pre>";
-				*/		
-				
+				*/
+			} //endif matches
+
+
+//echo "END graphid $graphid<br>";
+		  }//foreach graphdata
+
+//onegraph per groupid
 				if ( $aggregate ) {
+//echo "one graph per groupid $groupid, o<br>";
+
 					//input here if we're summing is $firstseries/$secondseries, not metrics.
 					produceGraph($orderby,$sumgraphs,$aggregate);
 					$metrics=array();
-				}					
-			
-			} else {
-				echo "ERROR: found no matches<br>";
-			} //endif matches
-		} //foreach loopdata		
+				}	
+
+		} //foreach groupdata		
 	}//endif name
 
 	if ( $debuggraph ) {
@@ -411,6 +498,9 @@ function produceGraph($orderby,$sumgraphs,$aggregate) {
 	global $graphservice, $name, $colors, $COLORS;
 //echo "calling productGraph for $name $sectiontitle - alias $graphalias<br>";
 
+	$debuggraph=false;
+
+
 	if (! isset($graphs) )
 		$graphs = array();	
 
@@ -423,7 +513,7 @@ function produceGraph($orderby,$sumgraphs,$aggregate) {
 		return 1;
 	} //endif orderby
 
-	if ( !empty($sumgraphs) ) {
+	if ( $sumgraphs ) {
 		//we ARE summing AND aggregating
 		if ( $aggregate) {
 			if ( $orderby === "host" ) {
@@ -456,8 +546,22 @@ function produceGraph($orderby,$sumgraphs,$aggregate) {
 			$metricsuffix = "";
 			if ( !empty($leftaxisfunctions) ) {
 				foreach ( $leftaxisfunctions as $function) {
-					$metricprefix .= $function . "(";
-					$metricsuffix .= ")";
+					//if it's a function that is  "internal" to sumSeries
+					if ( "$function" === "keepLastValue" ) {
+						$output="";
+						foreach ( explode(',', $leftaxisseries) as $value  ) {
+							if (! empty($output) ) 
+								$output .= ",";						
+							$output .= $function . "(" . $value . ")";	
+						}						
+						$leftaxisseries=$output;
+						unset($output);
+
+					} else {
+					//or external to sumseries
+						$metricprefix .= $function . "(";
+						$metricsuffix .= ")";
+					}
 				}	
 			}
 			$whatmetric=count($metrics);
@@ -472,8 +576,19 @@ function produceGraph($orderby,$sumgraphs,$aggregate) {
 			$metricsuffix = "";
 			if ( !empty($rightaxisfunctions) ) {
 				foreach ( $rightaxisfunctions as $function) {
-					$metricprefix .= $function . "(";
-					$metricsuffix .= ")";
+					if ( "$function" === "keepLastValue" ) {
+						$output="";
+						foreach ( explode(',', $rightaxisseries) as $value  ) {
+							if (! empty($output) ) 
+								$output .= ",";						
+							$output .= $function . "(" . $value . ")";	
+						}						
+						$rightaxisseries=$output;
+						unset($output);
+					} else {
+						$metricprefix .= $function . "(";
+						$metricsuffix .= ")";
+					}
 				}	
 			}
 			$whatmetric=count($metrics);
@@ -551,7 +666,6 @@ function produceGraph($orderby,$sumgraphs,$aggregate) {
 //			'is_pie_chart' => 1,
 	);
 
-	$debuggraph=false;
 	if ( $debuggraph ) {
 		echo "new graph is <br>";
 		echo "<pre>";

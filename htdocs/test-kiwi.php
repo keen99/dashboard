@@ -3,7 +3,7 @@ require_once 'phplib/Dashboard.php';
 require_once 'easod/functions.php';
 
 
-//startTimer();
+startTimer();
 
 
 
@@ -13,14 +13,13 @@ $graphTemplate['test template bypass'] = array(
 		'type' => 'graphite'
 		,'sectiontitle' => 'kiwi rpc test counters'
 		,'prefixpattern' => '(^statsd)'
-		,'hostpattern' => '(.*app.*)\.kiwi'
+		,'hostpattern' => '(.*app0.*)\.kiwi'
 		,'servicepattern' => '(rpc\..*)'
 		//,'servicepattern' => '(rpc\..*errors|rpc\..*count)'  //this shouldnt and doesnt work
 //		'servicepattern' => '(rpc\.blaze\.post\..*)'
 //		,'servicepattern' => '(rpc\.blaze\..*)'	
 //		,'servicepattern' => '(rpc\.auction\..*)'	
 		,'suffixpattern' => '(errors\.counters\.count|count\.counters\.count)'
-
 		,'leftaxispattern' => '(rpc\..*\.count)'
 		,'leftaxisalias' => 'count'
 		,'leftaxisfunctions' => 'keepLastValue'
