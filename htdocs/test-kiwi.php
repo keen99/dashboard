@@ -13,21 +13,35 @@ $graphTemplate['test template bypass'] = array(
 		'type' => 'graphite'
 		,'sectiontitle' => 'kiwi rpc test counters'
 		,'prefixpattern' => '(^statsd)'
-		,'hostpattern' => '(.*app0.*)\.kiwi'
+		,'hostpattern' => '(.*app.*)\.kiwi'
 		,'servicepattern' => '(rpc\..*)'
 		//,'servicepattern' => '(rpc\..*errors|rpc\..*count)'  //this shouldnt and doesnt work
 //		'servicepattern' => '(rpc\.blaze\.post\..*)'
 //		,'servicepattern' => '(rpc\.blaze\..*)'	
 //		,'servicepattern' => '(rpc\.auction\..*)'	
 		,'suffixpattern' => '(errors\.counters\.count|count\.counters\.count)'
-		,'leftaxispattern' => '(rpc\..*\.count)'
-		,'leftaxisalias' => 'count'
-		,'leftaxisfunctions' => 'keepLastValue'
-		,'rightaxispattern' => '(rpc\..*\.errors)'
-		,'rightaxisalias' => 'errors'
+
+		,'metricpatterns' => array (
+			'(rpc\..*\.count\.)',
+			'(rpc\..*\.errors)'
+		)
+		,'metricaliases' => array (
+				'count',
+				'errors'
+		)
+		,'metricfunctions' => array (
+			'keepLastValue',
+			'stacked,keepLastValue'
+		)
+
+//		,'leftaxispattern' => '(rpc\..*\.count)'
+//		,'leftaxisalias' => 'count'
+//		,'leftaxisfunctions' => 'keepLastValue'
+//		,'rightaxispattern' => '(rpc\..*\.errors)'
+//		,'rightaxisalias' => 'errors'
 // so we probably will need some specific logic around stacks, wen we can'cant use them
 //		,'rightaxisfunctions' => 'secondYAxis,stacked,keepLastValue'
-		,'rightaxisfunctions' => 'stacked,keepLastValue'
+//		,'rightaxisfunctions' => 'stacked,keepLastValue'
 
 
 //		,'leftaxispattern' => '(rpc\.blaze\.post\.count)	
