@@ -4,6 +4,31 @@ require_once('conf/dashboards.php');
 
 $sections = array(
 
+	'build me a' => local_Dashboard::BuildIt(),
+	
+
+	'Dynamic Stuff' => array (
+			'Templates' => Local_Dashboard::DYNAMIC_TABS(),
+			'Sum' => Local_Dashboard::DYNAMIC_TABS(),
+			'Agg' => Local_Dashboard::DYNAMIC_TABS(),
+			'Both' => Local_Dashboard::DYNAMIC_TABS(),
+	),
+
+
+	'treKiwi' => array ( 
+        '</div> <div> all counts ' => array(
+        	'sum' => 'link',
+        	'agg' => 'link',
+        	'both' => 'link',
+        ),
+        'all duration ' => array(
+        	'sum' => 'link',
+        	'agg' => 'link',
+        	'both' => 'link',
+
+        ),        
+	),
+
 	'Kiwi' => array ( 
         ' Live ' => Local_Dashboard::$KIWI_TABS,
 	),

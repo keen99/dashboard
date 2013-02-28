@@ -125,7 +125,8 @@ function filterData($data,$prefixpattern,$hostpattern,$servicepattern,$suffixpat
 			$allprefixes = array_unique($allprefixes);
 			$allsuffixes = array_unique($allsuffixes);
 		} else {
-			echo "sorry, our pattern matching failed. missing hosts/services/prefixes/suffixes.. graphtemplate $name";
+			echo "sorry, our pattern matching failed. missing hosts/services/prefixes/suffixes.. graphtemplate: dunno here. $name<br>";
+			echo "pattern was /$prefixpattern\.$hostpattern.*\.$servicepattern\.$suffixpattern/<br>";			
 			return 1;
 		}	
 
@@ -190,7 +191,7 @@ function createGraphsFromTemplates($name, $orderby="service", $sumgraphs=false,$
 
 
 	$debuggraph=false;
-//	$debuggraph=true;
+	$debuggraph=true;
 	
 	
 	if (! is_array($graphTemplate["$name"]) ) {
@@ -388,6 +389,7 @@ printTimer('postFetch');
 								//this should be an ok case.
 									echo "empty metric pattern for $metricid..<br>";
 								}
+//echo "metric id was $metricid and $metricserieslist[$metricid]<br>"; 
 								$metricid++;
 							}
 						} else {
@@ -395,27 +397,6 @@ printTimer('postFetch');
 							echo "BROKE. no metric patterns..<br>";
 						
 						}
-
-/*
-if ( !empty($rightaxispattern) && preg_match("/.$rightaxispattern.", $value) ) {
-							if (! empty($rightaxisseries) ) 
-								$rightaxisseries .= ",";
-							$rightaxisseries .= $value ;
-//echo "---right series: $rightaxisseries<br>";
-						} elseif ( !empty($leftaxispattern) && preg_match("/.*$leftaxispattern.", $value) ) {
-							if (! empty($leftaxisseries) ) 
-								$leftaxisseries .= ",";
-							$leftaxisseries .= $value;
-//echo "---left series: $leftaxisseries<br>";
-//need magic for this
-//							$leftaxisseries .= "keepLastValue(" . $value . ")";
-							 
-						} else {
-								echo "HELP we didn't match a pattern - $value<br>";
-						
-						}
-*/
-
 
 
 					} else { 
@@ -450,6 +431,7 @@ if ( !empty($rightaxispattern) && preg_match("/.$rightaxispattern.", $value) ) {
 								//this should be an ok case.
 									echo "empty metric pattern for $metricid..<br>";
 								}
+//echo "and metricid is $metricid<br>";
 								$metricid++;
 							} //done foreach patterns
 						} else {
@@ -458,44 +440,6 @@ if ( !empty($rightaxispattern) && preg_match("/.$rightaxispattern.", $value) ) {
 						
 						}
 
-/*
-
-
-					// we're not summing
-						if ( !empty($rightaxispattern) && preg_match("/.$rightaxispattern./", $value) ) {
-							if (!empty($rightaxisalias) ) 
-								$graphalias = $graphalias . " - " . $rightaxisalias;
-								
-							$metricprefix = "";
-							$metricsuffix = "";
-							if ( !empty($rightaxisfunctions) ) {
-								foreach ( $rightaxisfunctions as $function) {
-									$metricprefix .= $function . "(";
-									$metricsuffix .= ")";
-								}	
-							}
-//							$metrics[$i] = "cactiStyle(alias(secondYAxis(" . $metricprefix . $value . $metricsuffix . "), \"$graphalias\"))";
-							$metrics[$i] = "cactiStyle(alias(" . $metricprefix . $value . $metricsuffix . ", \"$graphalias\"))";
-						} elseif ( !empty($leftaxispattern) && preg_match("/.$leftaxispattern./", $value) ) {
-
-//dont forgetme
-							if ( !empty($leftaxisalias) ) 
-								$graphalias = $graphalias . " - " . $leftaxisalias;
-							$metricprefix = "";
-							$metricsuffix = "";
-							if ( !empty($leftaxisfunctions) ) {
-								foreach ( $leftaxisfunctions as $function) {
-									$metricprefix .= $function . "(";
-									$metricsuffix .= ")";
-								}	
-							}
-							$metrics[$i] = "cactiStyle(alias(" . $metricprefix . $value . $metricsuffix . ", \"$graphalias\"))";
-						} else {
-								echo "HELP we didn't match a pattern - $value<br>";								
-						}
-
-*/
-					  
 					}
 					$i++;
 
@@ -505,7 +449,7 @@ if ( !empty($rightaxispattern) && preg_match("/.$rightaxispattern.", $value) ) {
 //					if ( !$aggregate ) {
 					if ( !$aggregate && !$sumgraphs) {
 //echo "one graph per metric, go<br>";
-						produceGraph($orderby,$sumgraphs,$aggregate);
+						produceGraph($name,$orderby,$sumgraphs,$aggregate);
 						$metrics=array();
 						$i=0;
 					}
@@ -524,7 +468,7 @@ if ( !empty($rightaxispattern) && preg_match("/.$rightaxispattern.", $value) ) {
 //echo "series are<br>";
 //echo "left $leftaxisseries<br>";
 //echo "right $rightaxisseries<r>";
-					produceGraph($orderby,$sumgraphs,$aggregate);
+					produceGraph($name,$orderby,$sumgraphs,$aggregate);
 				}
 
 /*				
@@ -554,7 +498,7 @@ if ( !empty($rightaxispattern) && preg_match("/.$rightaxispattern.", $value) ) {
 //echo "one graph per groupid $groupid, o<br>";
 
 					//input here if we're summing is $firstseries/$secondseries, not metrics.
-					produceGraph($orderby,$sumgraphs,$aggregate);
+					produceGraph($name,$orderby,$sumgraphs,$aggregate);
 					$metrics=array();
 				}	
 
@@ -587,16 +531,15 @@ if ( !empty($rightaxispattern) && preg_match("/.$rightaxispattern.", $value) ) {
 
 
 
-function produceGraph($orderby,$sumgraphs,$aggregate) {
+function produceGraph($name,$orderby,$sumgraphs,$aggregate) {
 	global $graphs, $metrics, $templatecolors, $graphtitle, $graphhost, $servicepattern, $hostpattern;
 	global $sectiontitle,$graphalias;
+	global $graphTemplate;
 
 //	global $leftaxisseries, $rightaxisseries, $leftaxisalias,$rightaxisalias
 // global $leftaxisfunctions, $rightaxisfunctions;
 	global $metricserieslist, $metricpatterns,$metricaliases,$metricfunctions;
-
-	
-	global $graphservice, $name, $colors, $COLORS;
+	global $graphservice, $colors, $COLORS;
 //echo "calling productGraph for $name $sectiontitle - alias $graphalias<br>";
 
 	$debuggraph=false;
@@ -645,11 +588,15 @@ function produceGraph($orderby,$sumgraphs,$aggregate) {
 
 
 		$metricid=0;
+		//metricserieslist isn't ness sorted in the right order when we built it, so fix that
+		ksort($metricserieslist);
 		foreach ($metricserieslist as $metricseries ) {
 
 				$metricalias = $graphalias;
 				if ( isset($metricaliases[$metricid]) && !empty($metricaliases[$metricid]) ) 
 					$metricalias .= " - " . $metricaliases[$metricid];
+//echo "now metricid is $metricid and alias $metricalias and series $metricseries<br>";
+
 					
 				$metricprefix = "";
 				$metricsuffix = "";
@@ -679,67 +626,6 @@ function produceGraph($orderby,$sumgraphs,$aggregate) {
 				$metrics[$whatmetric] = "cactiStyle(alias(" . $metricprefix . "sumSeries(" . $metricseries . ")" . $metricsuffix . ", \"$metricalias\"))";
 		} //end foreach metricpatterns
 
-/*
-/////////
-
-		if ( !empty($leftaxisseries) ) {
-
-			$ourgraphalias = $graphalias . " - " . $leftaxisalias;
-			$metricprefix = "";
-			$metricsuffix = "";
-			if ( !empty($leftaxisfunctions) ) {
-				foreach ( $leftaxisfunctions as $function) {
-					//if it's a function that is  "internal" to sumSeries
-					if ( "$function" === "keepLastValue" ) {
-						$output="";
-						foreach ( explode(',', $leftaxisseries) as $value  ) {
-							if (! empty($output) ) 
-								$output .= ",";						
-							$output .= $function . "(" . $value . ")";	
-						}						
-						$leftaxisseries=$output;
-						unset($output);
-
-					} else {
-					//or external to sumseries
-						$metricprefix .= $function . "(";
-						$metricsuffix .= ")";
-					}
-				}	
-			}
-			$whatmetric=count($metrics);
-			$metrics[$whatmetric] = "cactiStyle(alias(" . $metricprefix . "sumSeries(" . $leftaxisseries . ")" . $metricsuffix . ", \"$ourgraphalias\"))";
-		}
-//we should probably hide the first axis, or only put the second on the second if there wasn't a first...
-// requires new graphite feature though
-		if ( !empty($rightaxisseries) ) {
-
-			$ourgraphalias = $graphalias . " - " . $rightaxisalias;
-			$metricprefix = "";
-			$metricsuffix = "";
-			if ( !empty($rightaxisfunctions) ) {
-				foreach ( $rightaxisfunctions as $function) {
-					if ( "$function" === "keepLastValue" ) {
-						$output="";
-						foreach ( explode(',', $rightaxisseries) as $value  ) {
-							if (! empty($output) ) 
-								$output .= ",";						
-							$output .= $function . "(" . $value . ")";	
-						}						
-						$rightaxisseries=$output;
-						unset($output);
-					} else {
-						$metricprefix .= $function . "(";
-						$metricsuffix .= ")";
-					}
-				}	
-			}
-			$whatmetric=count($metrics);
-			$metrics[$whatmetric] = "cactiStyle(alias(" . $metricprefix . "sumSeries(" . $rightaxisseries . ")" . $metricsuffix . ", \"$ourgraphalias\"))";
-
-		}
-*/
-
 	} //endif sumgraphs
 			
 
@@ -763,6 +649,7 @@ function produceGraph($orderby,$sumgraphs,$aggregate) {
 			$colorid++;
 			$ii++;
 		} else {
+		//if we defined a list of colors, use those as our source of color - still random though.
 			if (! isset($colorid) )
 			//	$colorid = 0;
 				$colorid = rand(0, count($templatecolors)-1);	
@@ -775,7 +662,8 @@ function produceGraph($orderby,$sumgraphs,$aggregate) {
 			$colors[$ii] = $templatecolors[$colorid];
 			$lastcolorid = $colorid;
 			$colorid++;
-			$ii++;						
+			$ii++;
+print_r($colors);
 		}
 	}
 
@@ -809,6 +697,12 @@ function produceGraph($orderby,$sumgraphs,$aggregate) {
 //			'is_ajax' => 1,
 //			'is_pie_chart' => 1,
 	);
+	
+	if ( isset($graphTemplate["$name"]['extraflags']) && is_array($graphTemplate["$name"]['extraflags']) ) {
+		foreach ( $graphTemplate["$name"]['extraflags'] as $flag => $value) {
+			$newgraph[$flag] = $value;
+		}
+	}
 
 	if ( $debuggraph ) {
 		echo "new graph is <br>";

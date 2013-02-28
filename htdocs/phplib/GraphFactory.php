@@ -407,7 +407,8 @@ class GraphFactory {
             if (isset($colors[$i])) {
                 if (isset(self::$NAMED_COLORS[$colors[$i]])) {
                     $color = '#' . self::$NAMED_COLORS[$colors[$i]];
-                } elseif (preg_match('/^[a-fA-F0-9]{6}$/', $colors[$i], $matches)) {
+//lets support any length codes)
+                } elseif (preg_match('/^[a-fA-F0-9]*$/', $colors[$i], $matches)) {
                     $color = '#' . $colors[$i];
                 }
             }
