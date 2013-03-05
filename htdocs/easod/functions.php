@@ -191,7 +191,7 @@ function createGraphsFromTemplates($name, $orderby="service", $sumgraphs=false,$
 
 
 	$debuggraph=false;
-	$debuggraph=true;
+//	$debuggraph=true;
 	
 	
 	if (! is_array($graphTemplate["$name"]) ) {
