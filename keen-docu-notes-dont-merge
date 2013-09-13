@@ -1,0 +1,130 @@
+$graphs
+
+type graphite
+
+    if (Dashboard::hasGraphitePie($graphs)) {
+    if (Dashboard::hasGraphitePercentage($graphs)) {
+    $has_graphite_with_html_legend = false;
+
+        foreach ((array)$section as $graph) {
+            if (isset($graph['type']) && $graph['type'] == 'graphite' &&
+                    isset($graph['show_html_legend']) && $graph['show_html_legend']$
+            ) {
+                $has_graphite_with_html_legend = true;
+            }
+
+
+            if ($graph['type'] == 'ganglia') {
+            } elseif ($graph['type'] == 'jenkins') {
+            } elseif ($graph['type'] == 'google_analytics') {
+
+
+
+'show_html_legend' => 0/1 - default 0 - title above graph isin html instead of part of the graph
+				- adds "clip" javascript but the js called is missing
+'show_legend' => 1, def 0 - show/hide bottom legend in the graph
+
+
+
+                    $until_time = isset($graph_config['until']) ? $graph_config['un$
+
+      $graph_config['time'] = $time;
+            $graph_config['until'] = $until;
+            $graph_config['show_deploys'] = $show_deploys;
+
+        $width = isset($graph_config['width']) ? $graph_config['width'] : GraphCons$
+        $height = isset($graph_config['height']) ? $graph_config['height'] : GraphC$
+        $graph_time = isset($graph_config['time']) 
+
+ switch ($graph_config['type']) {
+                case 'graphite':
+                case 'graphite_pie':
+                case 'graphite_percentage':
+^^above two broken missing js
+                case 'ganglia':
+                case 'cacti':
+until, metric, width, height
+                case 'html':
+title, html
+                case 'newrelic':
+url, metric, time, weidth, height
+                case 'fitb':
+host, portname, graphtype, title
+
+
+        if (isset($graph_config['colors'])) {
+
+
+    private function getGangliaDashboardHTML($graph_config) {
+        $is_dev = isset($graph_config['is_dev']) ? $graph_config['is_dev'] : false;
+        $is_report = isset($graph_config['is_report']) ? $graph_config['is_report']$
+        $no_legend = isset($graph_config['no_legend']) ? $graph_config['no_legend']$
+        $until = isset($graph_config['until']) ? $graph_config['until'] : null;
+             $g = new Graph_Ganglia($graph_config['graph_time'], $until);
+         $source = isset($metric['source']) ? $metric['source'] : null;
+            $node = isset($metric['node']) ? $metric['node'] : null;
+            $datum = isset($metric['datum']) ? $metric['datum'] : null;
+
+
+    private function getGraphitePieDashboardHTML($graph_config, $graph_time, $width$
+title
+legend_keys
+colors
+add_integral
+is_black
+show_legend
+sort_legend
+is_ajax
+use_average
+threshold
+
+    private function getGraphitePercentageDashboardHTML($graph_config, $graph_time,$
+title
+numerator_metrics
+denominator_metrics
+legend_keys
+id
+is_bar
+
+    private function getGraphiteDashboardHTML($graph_config) {
+graph_time
+show_deploys
+width
+height
+title
+show_legend
+stacked
+line_mode
+ [slope] / staircase / connected
+area_mode
+ => first / stacked / all [none]
+vtitle
+ - wow vtitle renders badly
+y_max
+hide_axes
+hide_grid
+is_black
+is_pie_chart
+show_html_legend
+show_copy_url
+numerator_metrics
+denominator_metrics
+ratio_suffix
+legend_keys
+is_ajax
+^borked
+xaxis_type
+yaxis_type
+until_time
+metrics
+colors
+is_black
+y_min
+
+
+    private function getLegendHtml($metrics, $colors, $graph_config) {
+legend_keys
+colors
+html
+legend_html
+
