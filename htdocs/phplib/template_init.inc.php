@@ -60,5 +60,6 @@ if (isset($graphs)) {
             array(
                 "/assets/css/copyurl.css",
             ));
+        $additional_html = '<p id="copy-message">Copied to clipboard!</p>';
     }
 }
