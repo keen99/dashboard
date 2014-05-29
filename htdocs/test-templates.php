@@ -149,3 +149,157 @@ $graphTemplate['statsdstats'] = array(
 		)
 
 );
+
+
+// TODO...  enable/disable/set/unset for sum and aggregate options
+
+
+// diamond.iad.graphite01.cpu.cpu0.idle
+$graphTemplate['cputoy1'] = array(
+                'sectiontitle' => 'cpu toy'
+                ,'prefixpattern' => '(^diamond\.iad)'
+                ,'hostpattern' => '(.*)'
+                ,'servicepattern' => 'cpu\.(.*)'
+                ,'suffixpattern' => '(idle|system)'
+                ,'metricpatterns' => array (
+                        '(cpu\..*\.idle)'
+                        ,'(cpu\..*\.system)'
+                )
+
+                ,'metricaliases' => array (
+//theres something broken in aliases land
+//we got idle twice...                	
+				"idle",
+				"system"
+
+                )
+
+                ,'metricfunctions' => array (
+                       	'keepLastValue',
+                       	'stacked,keepLastValue'
+                )
+
+);
+
+
+
+
+// NO sum, aggregate prefered
+$graphTemplate['cputotal'] = array(
+		'sectiontitle' => 'cpu total'
+		,'prefixpattern' => '(^diamond\.iad)'
+		,'hostpattern' => '(.*)'
+//		,'servicepattern' => 'cpu\.(.*)'
+		,'servicepattern' => 'cpu\.(total)'
+//		,'suffixpattern' => '(.*)'
+        ,'suffixpattern' => '(user|system|steal|softirq|nice|irq|iowait|guest)'
+		,'metricpatterns' => array (
+			'(cpu\..*\.user)'
+			,'(cpu\..*\.system)'
+			,'(cpu\..*\.steal)'
+			,'(cpu\..*\.softirq)'
+			,'(cpu\..*\.nice)'
+			,'(cpu\..*\.irq)'
+			,'(cpu\..*\.iowait)'
+			,'(cpu\..*\.guest)'
+		)
+
+
+		,'metricaliases' => array (
+"user",
+"system",
+"steal",
+"softirq",
+"nice",
+"irq",
+"iowait",
+"guest",
+		)
+
+		,'metricfunctions' => array (
+			'stacked,keepLastValue'
+			,'stacked,keepLastValue'
+			,'stacked,keepLastValue'
+			,'stacked,keepLastValue'
+			,'stacked,keepLastValue'
+			,'stacked,keepLastValue'
+			,'stacked,keepLastValue'
+			,'stacked,keepLastValue'
+			,'stacked,keepLastValue'
+		)
+
+
+
+		,'metricfunctions' => array (
+//			'secondYAxis',
+			'keepLastValue'		)
+	// only things supported by getGraphiteDashboardHTML
+		 ,'extraflags' => array(
+			'area_mode' => 'stacked',
+
+// there's a color bug here, we're not landing right
+//...if you use a named color that isnt in the list, we should alert
+
+//also, this gets used BACKWARDS vs the metrics set..no, thats not it either
+  		  'colors' => array (
+
+//"user",
+			'green',
+//"system",
+			'red',
+//"steal",
+			'pink',
+//"softirq",
+			'blue',
+//"nice",
+			'lightblue',
+//"irq",
+			'black',
+//"iowait",
+			'yellow',
+//"guest",
+			'grey'
+		  )
+
+		)
+
+);
+
+
+
+
+$graphTemplate['cpuidle'] = array(
+		'sectiontitle' => 'cpu idle'
+		,'prefixpattern' => '(^diamond\.iad)'
+		,'hostpattern' => '(.*)'
+//		,'servicepattern' => 'cpu\.(.*)'
+		,'servicepattern' => 'cpu\.(total)'
+//		,'suffixpattern' => '(.*)'
+		,'suffixpattern' => '(idle)'
+		,'metricpatterns' => array (
+			'(cpu\..*\.idle)'
+		)
+
+
+		,'metricaliases' => array (
+"idle",
+		)
+
+		,'metricfunctions' => array (
+			'stacked,keepLastValue'
+		)
+
+		,'metricfunctions' => array (
+//			'secondYAxis',
+			'keepLastValue'		)
+	// only things supported by getGraphiteDashboardHTML
+		 ,'extraflags' => array(
+//			'area_mode' => 'stacked',
+  		  'colors' => array (
+        'light-blue',
+
+		  )
+		)
+
+);
+
