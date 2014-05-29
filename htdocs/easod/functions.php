@@ -78,10 +78,37 @@ function printTimer($prefix='Timer') {
 function fetchGraphiteData() {
 //todo - add some caching here
 	global $graphite_server, $GlobalGraphiteData;
-	
+
+
+
+// theres some entertaining race conditions in here if we get hit while fetching
+
+
 	//poor mans caching - save it at least within this page load
 	if ( !isset($GlobalGraphiteData) ) {
-		$GlobalGraphiteData= json_decode(file_get_contents("http://$graphite_server/metrics/index.json")) ;
+
+// really ugly, but it's 10M at LS! we can't keep fetching that at 30s each
+//need to do some expire testing and stuff.
+		if ( !file_exists ('/tmp/.dashboard.json') && time()-filemtime('/tmp/.dashboard.json') > 2 * 3600 ) {
+
+			//the flushes in printtimer dont help us here. sigh.
+			printTimer("Fetching new data, no cache found or older than 2 hours<br>");
+			flush();
+
+//and get a real tmpdir and and nan
+			file_put_contents('/tmp/.dashboard.json', file_get_contents("http://$graphite_server/metrics/index.json") );
+			printTimer("Finished fetching index.json");			
+
+		} else {
+
+			#....
+
+			echo "using cached data<br>";
+
+		}
+
+		$GlobalGraphiteData= json_decode(file_get_contents("/tmp/.dashboard.json"));
+		// $GlobalGraphiteData= json_decode(file_get_contents("http://$graphite_server/metrics/index.json")) ;
 	}	
 	return($GlobalGraphiteData);
 }
@@ -125,8 +152,12 @@ function filterData($data,$prefixpattern,$hostpattern,$servicepattern,$suffixpat
 			$allprefixes = array_unique($allprefixes);
 			$allsuffixes = array_unique($allsuffixes);
 		} else {
+//name isnt define here in this case..
 			echo "sorry, our pattern matching failed. missing hosts/services/prefixes/suffixes.. graphtemplate: dunno here. $name<br>";
 			echo "pattern was /$prefixpattern\.$hostpattern.*\.$servicepattern\.$suffixpattern/<br>";			
+
+			print_r($match);
+
 			return 1;
 		}	
 
@@ -251,6 +282,7 @@ printTimer('postFetch');
 
 		// one graph per service or host, so our outer loops loops on these
 		//find our list of hosts or services
+//if filter fails, we need to handle that instead of moving on
 		$groupdata=filterData($data,$prefixpattern,$hostpattern,$servicepattern,$suffixpattern,$orderby);
 		//lets pre-filter our data.  no need to retain the whole set for searching later! 
 		// saves huge amounts of time for later preg_matching
