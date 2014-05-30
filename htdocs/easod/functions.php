@@ -222,8 +222,7 @@ function createGraphsFromTemplates($name, $orderby="service", $sumgraphs=false,$
 
 
 	$debuggraph=false;
-//	$debuggraph=true;
-	
+	$debuggraph=true;
 	
 	if (! is_array($graphTemplate["$name"]) ) {
 		echo "sorry, can't find graph template named $name<br>";
@@ -231,7 +230,7 @@ function createGraphsFromTemplates($name, $orderby="service", $sumgraphs=false,$
 	} else {
 
 		$data=fetchGraphiteData();
-printTimer('postFetch');
+//printTimer('postFetch');
 
 //read in our template//
 
@@ -453,7 +452,15 @@ printTimer('postFetch');
 												$metricsuffix .= ")";
 											}	
 										}
-										$whatmetric=count($metrics);
+// we assemble metrics here, but the order is based on matching the original list
+// and THAT order isn't configed, but comes from graphite
+// this means we lose our color (and other extras) later
+//							
+//so instead of whatmetric=count to find position, can we use the original metricpattern position?	
+//										$whatmetric=count($metrics);
+
+//ok, w/o sum or agg - we need above.  else our index, when we have just 1 metric on the graph, is non-zero, which is what graphfactory (~409) needs.
+										$whatmetric=$metricid;
 										$metrics[$whatmetric] = "cactiStyle(alias(" . $metricprefix . $value . $metricsuffix . ", \"$graphalias\"))";
 									} else {
 										//this is ok
@@ -538,13 +545,21 @@ printTimer('postFetch');
 	}//endif name
 
 	if ( $debuggraph ) {
-		echo "<hr>Final graph array:<br>";
+		echo "<hr>Final graph array [\$graphs]:<br>";
 		echo "<pre>";
 		print_r($graphs);
 	//	print_r($colors);
 		echo "</pre>";
 		echo "<hr>";
 	}
+
+	//above graphs array consumed by...
+	// template_content, 
+	//GraphFactory::getInstance()->getDashboardSectionsHTML($graphs,
+	// then we to get...section html, which creates $graph_config
+	// then to $html .= $this->getDashboardHTML($graph_config);
+	// into return $this->getGraphiteDashboardHTML($graph_config);
+
 
 	printTimer('doneGraphs');
 
@@ -562,7 +577,7 @@ printTimer('postFetch');
 }
 
 
-
+// returns/builds $graphs
 function produceGraph($name,$orderby,$sumgraphs,$aggregate) {
 	global $graphs, $metrics, $templatecolors, $graphtitle, $graphhost, $servicepattern, $hostpattern;
 	global $sectiontitle,$graphalias;
@@ -575,7 +590,7 @@ function produceGraph($name,$orderby,$sumgraphs,$aggregate) {
 //echo "calling productGraph for $name $sectiontitle - alias $graphalias<br>";
 
 	$debuggraph=false;
-
+//	$debuggraph=true;
 
 	if (! isset($graphs) )
 		$graphs = array();	
@@ -663,8 +678,11 @@ function produceGraph($name,$orderby,$sumgraphs,$aggregate) {
 
 	$ii=0;
 	$colors=array();
+//while this isn't our problem, we're already reversed, 
+//we shouldnt get in here if we have colors...	
 	while ( $ii <= count($metrics)-1 ) {
 	// if we don't define a set of colors to use, use our global set
+//if extra>colors is set, we still get in here.
 		if ( empty($templatecolors) ) {
 			if (! isset($colorid) )
 			//	$colorid = 0;
@@ -677,6 +695,11 @@ function produceGraph($name,$orderby,$sumgraphs,$aggregate) {
 				$colorid = rand(0, count($COLORS)-1);				
 
 				//$colorid = rand(0, count($COLORS)-1);				
+// echo "what about now.<br>";
+// echo "<pre>";
+// print_r($metrics);
+// echo "</pre>";
+// echo "are we here? $COLORS[$colorid] <br>";
 			$colors[$ii] = $COLORS[$colorid];
 			$colorid++;
 			$ii++;

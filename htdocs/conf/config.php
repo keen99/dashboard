@@ -9,7 +9,7 @@ $chef_server = "chef.example.com";
 $fitb_server = "fitb.example.com";
 $ganglia_server = "ganglia.example.com";
 $ganglia_server_dev = "ganglia.dev.example.com";
-$graphite_server = "graphite.example.com";
+$graphite_server = 'graphite.livingsocial.net';
 $graphite_server_dev = "graphite.dev.example.com";
 $splunk_server = "splunk.example.com";
 
@@ -25,5 +25,5 @@ $gangliacluster_dn = "HadoopDN";
 
 
 $cacti_server = "monitor.easod.ea.com";
-$graphite_server = "ec2-184-73-211-106.compute-1.amazonaws.com";
+$graphite_server = 'graphite.livingsocial.net';
 

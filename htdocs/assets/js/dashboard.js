@@ -14,7 +14,7 @@ var refresh_timeout = (typeof refresh_timeout !== 'undefined' ? refresh_timeout 
 
 /* Define your graph servers here */
 var ganglia_server = 'ganglia.example.com';
-var graphite_server = 'ec2-184-73-211-106.compute-1.amazonaws.com';
+var graphite_server = 'graphite.livingsocial.net';
 var cacti_server = 'monitor.easod.ea.com';
 
 function refreshImage() {

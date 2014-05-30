@@ -4,7 +4,8 @@
 require_once 'phplib/Dashboard.php';
 require_once 'easod/functions.php';
 
-require_once 'test-templates.php';
+// thisneeds to be driven by something else?!
+require_once 'ls-templates.php';
 
 startTimer();
 
@@ -45,7 +46,7 @@ $namespace="";
 
 
 
- printTimer('pre template');
+// printTimer('pre template');
 //exit;
 /** actually draws the page */
 include 'phplib/template.php';

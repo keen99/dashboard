@@ -12,6 +12,7 @@ class GraphFactory {
         'orange' => 'ff6633',
         'purple' => '663399',
         'gray' => 'aaaaaa',
+        'grey' => 'aaaaaa', // because some people like grey
         'olive' => '6b8e23',
         'light-blue' => 'b0c4de',
         'medium-spring-green' => '00fa9a',
@@ -400,7 +401,10 @@ class GraphFactory {
             $g->setBgColor('black');
             $g->setFgColor('white');
         }
-
+//some debug.
+echo "<pre>";
+print_r($metrics);
+echo "</pre><br>";
         for ($i = 0; $i < count($metrics); $i++) {
             $metric = $metrics[$i];
             $color = null;
@@ -410,6 +414,8 @@ class GraphFactory {
 //lets support any length codes)
                 } elseif (preg_match('/^[a-fA-F0-9]*$/', $colors[$i], $matches)) {
                     $color = '#' . $colors[$i];
+                } else {
+                    echo "WARNING: No color name/value supported for $colors[$i]<br>";
                 }
             }
             $g->addMetric($metric, $color);
