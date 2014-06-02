@@ -306,9 +306,14 @@ function createGraphsFromTemplates($name, $orderby="service", $sumgraphs=false,$
 
 
 			//now find our list of services or hosts - we'll do a GRAPH for each of these
-			//catch we get something supported.  could be in filterData too?
-			if ( $orderby === "host" || $orderby === "service" ) {
+			// note - we cant consolidate this because we need to filter by the -other- option (host filters by service..service by filter)
+			//maybe we could built this logic in filterData instead and just pass groupby
+			if ( $orderby === "host" ) {
+			//returns list of services
 				$graphdata=filterData($data,$prefixpattern,$hostpattern,$servicepattern,$suffixpattern,"service");
+			} elseif ( $orderby === "service" ) {
+			//returns list of hosts
+				$graphdata=filterData($data,$prefixpattern,$hostpattern,$servicepattern,$suffixpattern,"host");
 			} else {
 				echo "0unknown groupby $orderby";
 				exit; //return 1 if we catch it upstream
@@ -340,8 +345,10 @@ function createGraphsFromTemplates($name, $orderby="service", $sumgraphs=false,$
 				//constrain our data to only our group/section and our graph
 				// now identify our matches we'll use later
 				if ( $orderby === "host" ) {
+//echo "in host - /$prefixpattern\.$groupid.*\.$graphid\.$suffixpattern/";
 					$matches = preg_grep("/$prefixpattern\.$groupid.*\.$graphid\.$suffixpattern/", $data);
 				} elseif ( $orderby === "service" ) { 
+//echo "in service - /$prefixpattern\.$graphid.*\.$groupid\.$suffixpattern/";
 					$matches = preg_grep("/$prefixpattern\.$graphid.*\.$groupid\.$suffixpattern/", $data);				
 				} else {
 					echo "unknown groupby $orderby";
@@ -405,35 +412,40 @@ echo "here 2<br>";
 echo "here 1<br>";
 							if ( is_array($metric) ) {
 								$metricid=0;
-//								foreach ( $metricpatterns as $metricpattern ) {
-								foreach ( $metric as $key => $metricval) {
 
-echo "here and key is $key ";
-echo "<pre>";
-print_r($metricval);
-echo "</pre>";
-exit;
-continue;
-									if ( !empty($metricpattern) ) {
+								//extract the index from the array we want
+								//see http://stackoverflow.com/a/14966376/3692967
+								foreach ( array_keys($metric) as $index => $label) {
+									$metricval = $metric[$label];
 
-	//echo "testing $value for $metricpattern<Br>";
-										 if ( preg_match("/.*$metricpattern.*/", $value) ) {
-											if (! isset($metricserieslist[$metricid]) )
-												$metricserieslist[$metricid] = "";
-											if (! empty($metricserieslist[$metricid]) ) 
-												$metricserieslist[$metricid] .= ",";
-											$metricserieslist[$metricid] .= $value ;
-	//echo "now series is $metricserieslist[$metricid]<br>";
+//echo "metric loop key $key - " . $metricval['alias']. "<br>";
+echo "here - $index and $label ";
+// echo "<pre>";
+// print_r($metricval);
+// echo "</pre>";
+// exit;
+//continue;
+									if ( !empty($metricval['pattern']) ) {
+
+
+	//echo "testing $value for " . $metricval['pattern'] . "<Br>";
+										 if ( preg_match("/.*" . $metricval['pattern'] . ".*/", $value) ) {
+											if (! isset($metricserieslist[$index]) )
+												$metricserieslist[$index] = "";
+											if (! empty($metricserieslist[$index]) ) 
+												$metricserieslist[$index] .= ",";
+											$metricserieslist[$index] .= $value ;
+	//echo "now series is $metricserieslist[$index]<br>";
 										} else {
 											//this is OK, it just means we didn't match THIS pattern
 											//echo "HELP we didn't match a pattern2 - $value<br>";
 										}
 									} else {
 									//this should be an ok case.
-										echo "empty metric pattern for $metricid..<br>";
+										echo "empty metric pattern for $index..<br>";
 									}
-	//echo "metric id was $metricid and $metricserieslist[$metricid]<br>"; 
-									$metricid++;
+	//echo "metric id was $index and $metricserieslist[$index]<br>"; 
+									//$metricid++;
 								}
 							} else {
 		//what do we do in this case..aka single metric mode
@@ -615,8 +627,6 @@ echo "here 3<br>";
 //	echo "aggegate = $aggregate and sum is $sumgraphs<br>";
 //	echo "<hr>";
 } //end createGraphsFromTemplates
-
-
 
 
 // returns/builds $graphs

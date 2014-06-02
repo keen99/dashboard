@@ -345,8 +345,11 @@ function createGraphsFromTemplates($name, $orderby="service", $sumgraphs=false,$
 			//constrain our data to only our group/section and our graph
 			// now identify our matches we'll use later
 			if ( $orderby === "host" ) {
+echo "in host - /$prefixpattern\.$groupid.*\.$graphid\.$suffixpattern/";
 				$matches = preg_grep("/$prefixpattern\.$groupid.*\.$graphid\.$suffixpattern/", $data);
 			} elseif ( $orderby === "service" ) { 
+echo "in service - /$prefixpattern\.$graphid.*\.$groupid\.$suffixpattern/";
+
 				$matches = preg_grep("/$prefixpattern\.$graphid.*\.$groupid\.$suffixpattern/", $data);				
 			} else {
 				echo "unknown groupby $orderby";

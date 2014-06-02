@@ -130,8 +130,8 @@ $graphTemplate['cputotal'] = array(
 $graphTemplate['cputotal'] = array(
 		'sectiontitle' => 'cpu total'
 		,'prefixpattern' => '(^diamond\.iad)'
-//		,'hostpattern' => '(.*)'
-		,'hostpattern' => '(cache04)'
+		,'hostpattern' => '(.*)'
+//		,'hostpattern' => '(cache04)'
 
 //		,'servicepattern' => 'cpu\.(.*)'
 //		,'servicepattern' => 'cpu\.(total)'
