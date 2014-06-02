@@ -404,12 +404,8 @@ function createGraphsFromTemplates($name, $orderby="service", $sumgraphs=false,$
 
 				echo "setup alias as $graphalias for $value<br>";
 
-
-echo "here 2<br>";
 						if ( $sumgraphs ) {
 						// if we ARE going to sum graphs
-
-echo "here 1<br>";
 							if ( is_array($metric) ) {
 								$metricid=0;
 
