@@ -212,6 +212,13 @@ function filterData($data,$prefixpattern,$hostpattern,$servicepattern,$suffixpat
 
 // TODO - lefty/righty becomes an array of emtrics and their stuff...
 
+
+
+
+// ok ,start with one graph per item per host using metric array.
+
+
+
 function createGraphsFromTemplates($name, $orderby="service", $sumgraphs=false,$aggregate=false) {
 	global $graphTemplate, $COLORS, $graphs;
 	global $graphs, $metrics, $templatecolors, $graphtitle, $graphhost, $graphservice, $colors;
@@ -222,8 +229,9 @@ function createGraphsFromTemplates($name, $orderby="service", $sumgraphs=false,$
 
 
 	$debuggraph=false;
-//	$debuggraph=true;
+	$debuggraph=true;
 	
+//we could just if/exit here. we dont need the else.
 	if (! is_array($graphTemplate["$name"]) ) {
 		echo "sorry, can't find graph template named $name<br>";
 		exit;
@@ -240,32 +248,18 @@ function createGraphsFromTemplates($name, $orderby="service", $sumgraphs=false,$
 		$servicepattern=$graphTemplate["$name"]['servicepattern'];  //this is what gets graphed
 		$suffixpattern=$graphTemplate["$name"]['suffixpattern'];
 
-		// these two allow us to split $servicepattern matches and place them on 
-		// the two Y axis
-//mmmmm...
-		$metricpatterns = isset($graphTemplate["$name"]['metricpatterns']) ? $graphTemplate["$name"]['metricpatterns']:array($graphTemplate["$name"]['servicepattern']);
+
+// new shit.
+
+		$metric = $graphTemplate[$name]['metric'];
+
+// echo "<pre>";
+// print_r($metric);
+// echo "</pre>";
+// exit;
 
 
-		$leftaxispattern = isset($graphTemplate["$name"]['leftaxispattern']) ? $graphTemplate["$name"]['leftaxispattern']:array($graphTemplate["$name"]['servicepattern']);
-		$rightaxispattern = isset($graphTemplate["$name"]['rightaxispattern']) ? $graphTemplate["$name"]['rightaxispattern']:array();
-		// extra alias info
-//mm
-		$metricaliases = isset($graphTemplate["$name"]['metricaliases']) ? $graphTemplate["$name"]['metricaliases']:"";
-
-
-		$leftaxisalias = isset($graphTemplate["$name"]['leftaxisalias']) ? $graphTemplate["$name"]['leftaxisalias']:"";
-		$rightaxisalias = isset($graphTemplate["$name"]['rightaxisalias']) ? $graphTemplate["$name"]['rightaxisalias']:"";
-		//comma seperated list of extra functions to apply...
-		// no spaces!
-		// and these only apply inside the alias(
-//ug...
-		$metricfunctions = isset($graphTemplate["$name"]['metricfunctions']) ? $graphTemplate["$name"]['metricfunctions']:array();
-//		explode(",",$graphTemplate["$name"]['metricfunctions']):"";
-
-
-		$leftaxisfunctions = isset($graphTemplate["$name"]['leftaxisfunctions']) ? explode(",",$graphTemplate["$name"]['leftaxisfunctions']):"";
-		$rightaxisfunctions = isset($graphTemplate["$name"]['rightaxisfunctions']) ? explode(",",$graphTemplate["$name"]['rightaxisfunctions']):"";
-
+		// random set of colors, if defined
 		$templatecolors = isset($graphTemplate["$name"]['colors']) ? $graphTemplate["$name"]['colors']:"";
 		
 
@@ -295,6 +289,7 @@ function createGraphsFromTemplates($name, $orderby="service", $sumgraphs=false,$
 			print_r($groupdata);
 			echo "</pre>";
 		}
+
 		// loop across list of services or hosts
 		// we produce a SECTION for each of these.
 		foreach ($groupdata as $groupid) {
@@ -308,15 +303,12 @@ function createGraphsFromTemplates($name, $orderby="service", $sumgraphs=false,$
 
 
 			//now find our list of services or hosts - we'll do a GRAPH for each of these
-			if ( $orderby === "host" ) {
-			//returns list of services
+			//catch we get something supported.  could be in filterData too?
+			if ( $orderby === "host" || $orderby === "service" ) {
 				$graphdata=filterData($data,$prefixpattern,$hostpattern,$servicepattern,$suffixpattern,"service");
-			} elseif ( $orderby === "service" ) {
-			//returns list of hosts
-				$graphdata=filterData($data,$prefixpattern,$hostpattern,$servicepattern,$suffixpattern,"host");
 			} else {
 				echo "0unknown groupby $orderby";
-				return 1;
+				exit; //return 1 if we catch it upstream
 			}
 			if ( $debuggraph ) {	
 				echo "<hr>";
@@ -326,211 +318,256 @@ function createGraphsFromTemplates($name, $orderby="service", $sumgraphs=false,$
 			}
 
 
-		  foreach ($graphdata as $graphid) {
+			foreach ($graphdata as $graphid) {
 
-			//now loop through our graphs...
+				//now loop through our graphs...
 
-			if ( !$aggregate ) {
-			//reset to zero if we're not aggregating AND we're not summing.. - if we are, keep growing
-				$i=0;
-				$metrics = array();
-				$metricserieslist=array();
-				$leftaxisseries="";
-				$rightaxisseries="";
-			}
+				if ( !$aggregate ) {
+				//reset to zero if we're not aggregating AND we're not summing.. - if we are, keep growing
+					$i=0;
+					$metrics = array();
+					$metricserieslist=array();
+					$leftaxisseries="";
+					$rightaxisseries="";
+				}
 //echo "STARTING graphid $graphid<br>";
 
 //what do with agg and sum	
-			// find our metrics that go into this graph section - or as close as we can.
-			//constrain our data to only our group/section and our graph
-			// now identify our matches we'll use later
-			if ( $orderby === "host" ) {
-				$matches = preg_grep("/$prefixpattern\.$groupid.*\.$graphid\.$suffixpattern/", $data);
-			} elseif ( $orderby === "service" ) { 
-				$matches = preg_grep("/$prefixpattern\.$graphid.*\.$groupid\.$suffixpattern/", $data);				
-			} else {
-				echo "unknown groupby $orderby";
-				return 1;
-			}
-
-
-			if ( $debuggraph ) {	
-				echo "<hr>";
-				echo "now our matches for $graphid<br>";
-				echo "<pre>";
-				print_r($matches);
-				echo "</pre>";
-			}
-
-			if ( isset($matches) && count($matches) > 0)  {
-				$matches = array_unique($matches);
-//THESE are are our graph LINES
-				foreach ($matches as $value) {
-					unset($graphdata);
-					preg_match("/$prefixpattern\.$hostpattern.*\.$servicepattern\.$suffixpattern/", $value, $graphdata);
-//echo "START of foreach match for $value<Br>";
-
-					/*				
-					echo "<pre>";
-					echo "$value<br>";
-					print_r($graphdata);
-					echo "</pre>";
-					*/
-					
-					if (! isset($graphdata[0]) ) {
-						echo "we failed to set graphdata, what happened...value $value<br>";
-					}
-					$graphtarget=$graphdata[0];
-					$graphprefix=$graphdata[1];
-					$graphhost=$graphdata[2];
-					$graphservice=$graphdata[3];
-					$graphsuffix=$graphdata[4];
-
-
-					// figure out how we're going to setup our alias.  basically should be opposite of our
-					// graph title		
-					if ( $orderby === "host" ) {
-						$graphalias = $graphservice;
-					} elseif ( $orderby === "service" ) { 
-						$graphalias = $graphhost;
-					} else {
-						echo "2unknown groupby $orderby";
-						return 1;
-					}
-
-					if ( $sumgraphs ) {
-					// if we ARE going to sum graphs
-						if ( isset($metricpatterns[0]) ) {
-							$metricid=0;
-							foreach ( $metricpatterns as $metricpattern ) {
-								if ( !empty($metricpattern) ) {
-//echo "testing $value for $metricpattern<Br>";
-									 if ( preg_match("/.*$metricpattern.*/", $value) ) {
-										if (! isset($metricserieslist[$metricid]) )
-											$metricserieslist[$metricid] = "";
-										if (! empty($metricserieslist[$metricid]) ) 
-											$metricserieslist[$metricid] .= ",";
-										$metricserieslist[$metricid] .= $value ;
-//echo "now series is $metricserieslist[$metricid]<br>";
-									} else {
-										//this is OK, it just means we didn't match THIS pattern
-										//echo "HELP we didn't match a pattern2 - $value<br>";
-									}
-								} else {
-								//this should be an ok case.
-									echo "empty metric pattern for $metricid..<br>";
-								}
-//echo "metric id was $metricid and $metricserieslist[$metricid]<br>"; 
-								$metricid++;
-							}
-						} else {
-	//what do we do in this case..aka single metric mode
-							echo "BROKE. no metric patterns..<br>";
-						
-						}
-
-
-					} else { 
-					// we're not summing
-
-						if ( isset($metricpatterns[0]) ) {
-							$metricid=0;
-//find a way to create a GRAPH for each match in here..
-//that could make this a bit safer for unruley metricpatterns that are too broad..then you'd just get more graphs
-							foreach ( $metricpatterns as $metricpattern ) {
-								if ( !empty($metricpattern) ) {
-									 if ( preg_match("/.*$metricpattern.*/", $value) ) {
-										if (!empty($metricaliases[$metricid]) ) 
-											$graphalias = $graphalias . " - " . $metricaliases[$metricid];
-									
-										$metricprefix = "";
-										$metricsuffix = "";
-
-										if ( !empty($metricfunctions[$metricid]) ) {
-											foreach ( explode(',',$metricfunctions[$metricid]) as $function) {
-												$metricprefix .= $function . "(";
-												$metricsuffix .= ")";
-											}	
-										}
-// we assemble metrics here, but the order is based on matching the original list
-// and THAT order isn't configed, but comes from graphite
-// this means we lose our color (and other extras) later
-//							
-//so instead of whatmetric=count to find position, can we use the original metricpattern position?	
-//										$whatmetric=count($metrics);
-
-//ok, w/o sum or agg - we need above.  else our index, when we have just 1 metric on the graph, is non-zero, which is what graphfactory (~409) needs.
-										$whatmetric=$metricid;
-										$metrics[$whatmetric] = "cactiStyle(alias(" . $metricprefix . $value . $metricsuffix . ", \"$graphalias\"))";
-									} else {
-										//this is ok
-										//echo "HELP we didn't match a pattern1 - $value<br>";
-									}
-								} else {
-								//this should be an ok case.
-									echo "empty metric pattern for $metricid..<br>";
-								}
-//echo "and metricid is $metricid<br>";
-								$metricid++;
-							} //done foreach patterns
-						} else {
-	//what do we do in this case..aka single metric mode
-							echo "BROKE. no metric patterns..<br>";
-						
-						}
-
-					}
-					$i++;
-
-	
-					//if we're not aggregating, spit out a graph here
-//graph per metric
-//					if ( !$aggregate ) {
-					if ( !$aggregate && !$sumgraphs) {
-//echo "one graph per metric, go<br>";
-						produceGraph($name,$orderby,$sumgraphs,$aggregate);
-						$metrics=array();
-						$i=0;
-					}
-	
-//				echo "END of foreach match for $value, is is $i<Br>";
-// 				echo "end foreach metrics are <Br>";
-// 				echo "<pre>";
-// 				print_R($metrics);
-// 				echo "</pre>";
-				} //end foreach lines matches
-//when we sum
-//we dont use "metrics"
-//we use series
-				if ( !$aggregate && $sumgraphs) {
-//				echo "one graph per set of metrics, go<br>";
-//echo "series are<br>";
-//echo "left $leftaxisseries<br>";
-//echo "right $rightaxisseries<r>";
-					produceGraph($name,$orderby,$sumgraphs,$aggregate);
+				// find our metrics that go into this graph section - or as close as we can.
+				//constrain our data to only our group/section and our graph
+				// now identify our matches we'll use later
+				if ( $orderby === "host" ) {
+					$matches = preg_grep("/$prefixpattern\.$groupid.*\.$graphid\.$suffixpattern/", $data);
+				} elseif ( $orderby === "service" ) { 
+					$matches = preg_grep("/$prefixpattern\.$graphid.*\.$groupid\.$suffixpattern/", $data);				
+				} else {
+					echo "unknown groupby $orderby";
+					exit; //return 1 if we catch it upstream
 				}
 
-/*				
-	echo "metrics are <Br>";
-	echo "<pre>";
-	print_R($metrics);
-	echo "</pre>";
-*/
+
+				if ( $debuggraph ) {	
+					echo "<hr>";
+					echo "now our matches for $graphid<br>";
+					echo "<pre>";
+					print_r($matches);
+					echo "</pre>";
+				}
+
+				if ( isset($matches) && count($matches) > 0)  {
+					$matches = array_unique($matches);
+	//THESE are are our graph LINES
+					foreach ($matches as $value) {
+						unset($graphdata);
+						preg_match("/$prefixpattern\.$hostpattern.*\.$servicepattern\.$suffixpattern/", $value, $graphdata);
+	//echo "START of foreach match for $value<Br>";
+
+						echo "graph data<br>";			
+						echo "<pre>";
+						echo "$value<br>";
+						print_r($graphdata);
+						echo "</pre>";
+						
+						
+						if (! isset($graphdata[0]) ) {
+							echo "we failed to set graphdata, what happened...value $value<br>";
+						}
+						//break our found items up into chunks..
+						$graphtarget=$graphdata[0];
+						$graphprefix=$graphdata[1];
+						$graphhost=$graphdata[2];
+						$graphservice=$graphdata[3];
+						$graphsuffix=$graphdata[4];
+
+
+//this is our default alias setup.  doesnt seem enough?
+						// figure out how we're going to setup our alias.  basically should be opposite of our
+						// graph title		
+						if ( $orderby === "host" ) {
+							$graphalias = $graphservice;
+						} elseif ( $orderby === "service" ) { 
+							$graphalias = $graphhost;
+						} else {
+							echo "2unknown groupby $orderby";
+							return 1;
+						}
+
+				echo "setup alias as $graphalias for $value<br>";
+
+
+echo "here 2<br>";
+						if ( $sumgraphs ) {
+						// if we ARE going to sum graphs
+
+echo "here 1<br>";
+							if ( is_array($metric) ) {
+								$metricid=0;
+//								foreach ( $metricpatterns as $metricpattern ) {
+								foreach ( $metric as $key => $metricval) {
+
+echo "here and key is $key ";
+echo "<pre>";
+print_r($metricval);
+echo "</pre>";
+exit;
+continue;
+									if ( !empty($metricpattern) ) {
+
+	//echo "testing $value for $metricpattern<Br>";
+										 if ( preg_match("/.*$metricpattern.*/", $value) ) {
+											if (! isset($metricserieslist[$metricid]) )
+												$metricserieslist[$metricid] = "";
+											if (! empty($metricserieslist[$metricid]) ) 
+												$metricserieslist[$metricid] .= ",";
+											$metricserieslist[$metricid] .= $value ;
+	//echo "now series is $metricserieslist[$metricid]<br>";
+										} else {
+											//this is OK, it just means we didn't match THIS pattern
+											//echo "HELP we didn't match a pattern2 - $value<br>";
+										}
+									} else {
+									//this should be an ok case.
+										echo "empty metric pattern for $metricid..<br>";
+									}
+	//echo "metric id was $metricid and $metricserieslist[$metricid]<br>"; 
+									$metricid++;
+								}
+							} else {
+		//what do we do in this case..aka single metric mode
+								echo "BROKE. no metric patterns..<br>";
+								exit;
+							}
+
+
+						} else { 
+						// we're not summing
+
+echo "here 3.5<br>";
+
+							if ( is_array($metric) ) {
+//metricid should die
+								$metricid=0;
+	//find a way to create a GRAPH for each match in here..
+	//that could make this a bit safer for unruley metricpatterns that are too broad..then you'd just get more graphs
+
+//we loop through each metric we want to see if it matches the value we already have.  that's why our order is goofy.
+//								foreach ( $metric as $key => $metricval) {
+
+// echo "here ";
+// echo "<pre>";
+// print_r(array_keys($metric));
+// echo "</pre>";
+//exit;
+								//extract the index from the array we want
+								//see http://stackoverflow.com/a/14966376/3692967
+								foreach ( array_keys($metric) as $index => $label) {
+									$metricval = $metric[$label];
+
+//echo "metric loop key $key - " . $metricval['alias']. "<br>";
+echo "here - $index and $label ";
+// echo "<pre>";
+// print_r($metricval);
+// echo "</pre>";
+// exit;
+//continue;
+									if ( !empty($metricval['pattern']) ) {
+
+
+										 if ( preg_match("/.*" . $metricval['pattern'] . ".*/", $value) ) {
+
+//if we specify an alias, append it to our automatic alias.
+											if (!empty($metricval['alias']) ) 
+												$graphalias = $graphalias . " - " . $metricval['alias'];
+											$metricprefix = "";
+											$metricsuffix = "";
+
+											if ( !empty($metricval['function']) ) {
+												foreach ( explode(',',$metricval['function']) as $function) {
+													$metricprefix .= $function . "(";
+													$metricsuffix .= ")";
+												}	
+											}
+	
+
+											//for agg, we need to use the index as defined so users can control order
+												if ( $aggregate ) {
+												$whatmetric=$index;
+											} else {
+											//for everything else, just start at zero (this should only be a single entry per graph....we 
+	//note that there's no order-on-page control with this... but if we index to >0 graphfactory blows up.
+												$whatmetric=count($metrics);
+											}
+
+											$metrics[$whatmetric] = "cactiStyle(alias(" . $metricprefix . $value . $metricsuffix . ", \"$graphalias\"))";
+										} else {
+											//this is ok
+											//echo "HELP we didn't match a pattern1 - $value<br>";
+										}
+									} else {
+									//this should be an ok case.
+										echo "empty metric pattern for $metricid..<br>";
+									}
+	//echo "and metricid is $metricid<br>";
+									$metricid++;
+								} //done foreach patterns
+							} else {
+		//what do we do in this case..aka single metric mode
+								echo "BROKE. no metric patterns..<br>";
+							
+							}
+
+						}
+						$i++;
+
+echo "here 3<br>";		
+						//if we're not aggregating, spit out a graph here
+	//graph per metric
+	//					if ( !$aggregate ) {
+						if ( !$aggregate && !$sumgraphs) {
+	//echo "one graph per metric, go<br>";
+							produceGraph($name,$orderby,$sumgraphs,$aggregate);
+							$metrics=array();
+							$i=0;
+						}
 		
+	//				echo "END of foreach match for $value, is is $i<Br>";
+	// 				echo "end foreach metrics are <Br>";
+	// 				echo "<pre>";
+	// 				print_R($metrics);
+	// 				echo "</pre>";
+					} //end foreach lines matches
+	//when we sum
+	//we dont use "metrics"
+	//we use series
+					if ( !$aggregate && $sumgraphs) {
+	//				echo "one graph per set of metrics, go<br>";
+	//echo "series are<br>";
+	//echo "left $leftaxisseries<br>";
+	//echo "right $rightaxisseries<r>";
+						produceGraph($name,$orderby,$sumgraphs,$aggregate);
+					}
+
+	/*				
+		echo "metrics are <Br>";
+		echo "<pre>";
+		print_R($metrics);
+		echo "</pre>";
+	*/
 			
-			} else {
-				//it's actually valid to sometimes not find matches
-				/*
-				echo "ERROR: found no matches $graphid<br>";
-				echo "<pre>";
-				print_r($matches);
-				echo "</pre>";
-				*/
-			} //endif matches
+				
+				} else {
+					//it's actually valid to sometimes not find matches
+					/*
+					echo "ERROR: found no matches $graphid<br>";
+					echo "<pre>";
+					print_r($matches);
+					echo "</pre>";
+					*/
+				} //endif matches
 
 
 //echo "END graphid $graphid<br>";
-		  }//foreach graphdata
+			}//foreach graphdata
 
 //onegraph per groupid
 				if ( $aggregate ) {

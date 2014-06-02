@@ -16,3 +16,24 @@ expand/collapse service and host view someway  (to only show the selected servic
 
 
 ..alias/label when no alias speced needs help
+
+
+
+
+
+
+
+
+new metrics structure
+
+
+graphTemplate[<name>] [
+	....
+	metric [#?] [
+		pattern = (system)
+		alias = system
+		color = 		#for specific color vs random list, or just use extras?
+		function =		#these wrap the metric?
+		axis = left/right #place on this axis for multi-axis
+
+	colors [ random list ]

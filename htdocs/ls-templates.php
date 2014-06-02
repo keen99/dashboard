@@ -124,6 +124,104 @@ $graphTemplate['cputotal'] = array(
 
 );
 
+//dsr
+
+
+$graphTemplate['cputotal'] = array(
+		'sectiontitle' => 'cpu total'
+		,'prefixpattern' => '(^diamond\.iad)'
+//		,'hostpattern' => '(.*)'
+		,'hostpattern' => '(cache04)'
+
+//		,'servicepattern' => 'cpu\.(.*)'
+//		,'servicepattern' => 'cpu\.(total)'
+		,'servicepattern' => '(cpu\.total)'
+//this goes a bit wild w/ service+agg..and goes uri-limit w/ host+agg
+//		,'servicepattern' => '(cpu\..*)'
+//		,'suffixpattern' => '(.*)'
+//        ,'suffixpattern' => '(user|system|steal|softirq|nice|irq|iowait|guest)'
+//this has to really be specific, otherwise some graph views get bad
+        ,'suffixpattern' => '(user|system|nice|iowait)'
+
+        ,'metric' => array (
+	        'iowait' => array (
+	        	'pattern' => '(cpu\..*\.iowait)',
+	        	'alias' => 'iowait',
+	        	'color' => 'FFF200', //yellow
+				'function' => 'keepLastValue'
+				//'axis' => 'left',
+	        )
+	        ,'system' => array (
+	        	'pattern' => '(cpu\..*\.system)',
+	        	'alias' => 'system',
+	        	'color' => 'FF0000', //red
+				'function' => 'keepLastValue'
+				//'axis' => 'left',
+	        )	
+	        ,'user' => array (
+	        	'pattern' => '(cpu\..*\.user)',
+	        	'alias' => 'user',
+	        	'color' => '0000FF', //blue
+				'function' => 'keepLastValue'
+				//'axis' => 'left',
+	        )
+	        ,'nice' => array (
+	        	'pattern' => '(cpu\..*\.nice)',
+	        	'alias' => 'nice',
+	        	'color' => '00FF00', //green
+				'function' => 'keepLastValue'
+				//'axis' => 'left',
+	        )
+	    )
+
+
+		,'metricpatterns' => array (
+			// '(cpu\..*\.steal)',
+			// '(cpu\..*\.softirq)',
+			// '(cpu\..*\.irq)',
+			'(cpu\..*\.iowait)',
+			// '(cpu\..*\.guest)',
+			'(cpu\..*\.system)',
+			'(cpu\..*\.user)',
+			'(cpu\..*\.nice)',
+		)
+		,'metricaliases' => array (
+			// "steal",
+			// "softirq",
+			// "irq",
+			"iowait",
+			// "guest",
+			"system",
+			"user",
+			"nice",
+		)
+		// only things supported by GraphFactory::getGraphiteDashboardHTML
+		,'extraflags' => array(
+			'area_mode' => 'stacked',
+			'colors' => array (
+				// //steal
+				// 'grey',
+				// //softirq
+				// 'light-blue',
+				//irq pink
+				// 'FF00FF',
+				//iowait, yellow
+				'FFF200',
+				// // guest,
+				// 'wheat',
+				// system, red
+				'FF0000',
+				// user, blue
+				'0000FF',
+				//nice, green
+				'00FF00',
+			)
+		)
+
+);
+
+//dsr
+
 
 $graphTemplate['cpuidle'] = array(
 		'sectiontitle' => 'cpu idle'

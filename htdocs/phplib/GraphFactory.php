@@ -402,9 +402,9 @@ class GraphFactory {
             $g->setFgColor('white');
         }
 //some debug.
-echo "<pre>";
-print_r($metrics);
-echo "</pre><br>";
+// echo "<pre>";
+// print_r($metrics);
+// echo "</pre><br>";
         for ($i = 0; $i < count($metrics); $i++) {
             $metric = $metrics[$i];
             $color = null;

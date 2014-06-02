@@ -22,6 +22,7 @@ if ( $_GET['graphtemplate'] === 'empty' ) {
 	echo '<div class=notice>please choose a graph template<br></div>';
 	$graphs=array();
 } else {
+//dsr
 	createGraphsFromTemplates($_GET['graphtemplate'], $_GET['groupby'], $_GET['sum'], $_GET['agg']);
 }
 
