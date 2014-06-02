@@ -33,7 +33,7 @@ class Local_Dashboard {
 	
 	public function BuildIt() {
 
-		require 'test-templates.php';
+		require 'ls-templates.php';
 		$output=array();
 		$types=array('normal', 'sum', 'agg', 'both');
 		$groupbys=array('host', 'service');
@@ -72,8 +72,14 @@ class Local_Dashboard {
 	public function DYNAMIC_TABS($type='normal') {
 		//dont require once here - otherwise a second pass might not get it's data
 //this shouldn't be hardcoded...
-		require 'test-templates.php';
+// this needs to be passed in some how.
+
+		require 'ls-templates.php';
 		$viewperiod='1d';
+//this too.
+
+//or not...since this is kinda specific and not generic.
+
 		$viewurl='viewtemplate.php?time=' . $viewperiod . '&graphtemplate=';
 		foreach ( $graphTemplate as $key => $value) {
 			$title=$value['sectiontitle'];

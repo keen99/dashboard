@@ -2,10 +2,10 @@
 
 
 require_once 'phplib/Dashboard.php';
-require_once 'easod/functions.php';
+require_once 'easod/functions-olds.php';
 
 // thisneeds to be driven by something else?!
-require_once 'ls-templates.php';
+require_once 'test-templates.php';
 
 startTimer();
 
