@@ -89,7 +89,8 @@ function fetchGraphiteData() {
 
 // really ugly, but it's 10M at LS! we can't keep fetching that at 30s each
 //need to do some expire testing and stuff.
-		if ( !file_exists ('/tmp/.dashboard.json') && time()-filemtime('/tmp/.dashboard.json') > 2 * 3600 ) {
+		//fetch if 2 hours old (7200 seconds)
+		if ( !file_exists ('/tmp/.dashboard.json') || time()-filemtime('/tmp/.dashboard.json') > 2 * 3600 ) {
 
 			//the flushes in printtimer dont help us here. sigh.
 			printTimer("Fetching new data, no cache found or older than 2 hours<br>");
@@ -103,7 +104,9 @@ function fetchGraphiteData() {
 
 			#....
 
-			echo "using cached data<br>";
+			echo "using cached data - age: ";
+			echo time()-filemtime('/tmp/.dashboard.json');
+			echo " seconds<br>";
 
 		}
 
