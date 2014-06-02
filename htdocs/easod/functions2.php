@@ -232,7 +232,7 @@ function createGraphsFromTemplates($name, $orderby="service", $sumgraphs=false,$
 
 
 	$debuggraph=false;
-	$debuggraph=true;
+//	$debuggraph=true;
 	
 //we could just if/exit here. we dont need the else.
 	if (! is_array($graphTemplate["$name"]) ) {
@@ -251,10 +251,7 @@ function createGraphsFromTemplates($name, $orderby="service", $sumgraphs=false,$
 		$servicepattern=$graphTemplate["$name"]['servicepattern'];  //this is what gets graphed
 		$suffixpattern=$graphTemplate["$name"]['suffixpattern'];
 
-
-// new shit.
-
-		$metric = $graphTemplate[$name]['metric'];
+		$metric = $graphTemplate["$name"]['metric'];
 
 // echo "<pre>";
 // print_r($metric);
@@ -369,15 +366,21 @@ function createGraphsFromTemplates($name, $orderby="service", $sumgraphs=false,$
 	//THESE are are our graph LINES
 					foreach ($matches as $value) {
 						unset($graphdata);
-						preg_match("/$prefixpattern\.$hostpattern.*\.$servicepattern\.$suffixpattern/", $value, $graphdata);
-	//echo "START of foreach match for $value<Br>";
 
-						echo "graph data<br>";			
-						echo "<pre>";
-						echo "$value<br>";
-						print_r($graphdata);
-						echo "</pre>";
-						
+//dsr
+						preg_match("/$prefixpattern\.$hostpattern.*\.$servicepattern\.$suffixpattern/", $value, $graphdata);
+	// echo "START of foreach match for $value<Br>";
+
+	// 	echo "graph data<br>";			
+	// 	echo "<pre>";
+	// 	echo "$value<br>";
+	// 	print_r($graphdata);
+	// 	echo "</pre>";
+
+// at this point, we've basically commited to creating a graph.
+// because we have a suffix match.
+// should we fill that out, or should we skip it if we dont ahve a metric line for it?
+//dsr match TODO					
 						
 						if (! isset($graphdata[0]) ) {
 							echo "we failed to set graphdata, what happened...value $value<br>";
@@ -402,20 +405,18 @@ function createGraphsFromTemplates($name, $orderby="service", $sumgraphs=false,$
 							return 1;
 						}
 
-				echo "setup alias as $graphalias for $value<br>";
+		// echo "setup alias as $graphalias for $value<br>";
 
 						if ( $sumgraphs ) {
 						// if we ARE going to sum graphs
 							if ( is_array($metric) ) {
-								$metricid=0;
-
 								//extract the index from the array we want
 								//see http://stackoverflow.com/a/14966376/3692967
 								foreach ( array_keys($metric) as $index => $label) {
 									$metricval = $metric[$label];
 
 //echo "metric loop key $key - " . $metricval['alias']. "<br>";
-echo "here - $index and $label ";
+// echo "here - $index and $label ";
 // echo "<pre>";
 // print_r($metricval);
 // echo "</pre>";
@@ -441,7 +442,6 @@ echo "here - $index and $label ";
 										echo "empty metric pattern for $index..<br>";
 									}
 	//echo "metric id was $index and $metricserieslist[$index]<br>"; 
-									//$metricid++;
 								}
 							} else {
 		//what do we do in this case..aka single metric mode
@@ -453,11 +453,7 @@ echo "here - $index and $label ";
 						} else { 
 						// we're not summing
 
-echo "here 3.5<br>";
-
 							if ( is_array($metric) ) {
-//metricid should die
-								$metricid=0;
 	//find a way to create a GRAPH for each match in here..
 	//that could make this a bit safer for unruley metricpatterns that are too broad..then you'd just get more graphs
 
@@ -475,7 +471,7 @@ echo "here 3.5<br>";
 									$metricval = $metric[$label];
 
 //echo "metric loop key $key - " . $metricval['alias']. "<br>";
-echo "here - $index and $label ";
+// echo "here - $index and $label ";
 // echo "<pre>";
 // print_r($metricval);
 // echo "</pre>";
@@ -492,12 +488,25 @@ echo "here - $index and $label ";
 											$metricprefix = "";
 											$metricsuffix = "";
 
+
+											// must be outside of the function prefixes
+											if ( !empty($metricval['color']) ) {
+												$metricprefix .= "color(";
+												//append
+												 $metricsuffix .= ", \"" . $metricval['color'] . "\")";
+											}
+											
+
 											if ( !empty($metricval['function']) ) {
 												foreach ( explode(',',$metricval['function']) as $function) {
 													$metricprefix .= $function . "(";
-													$metricsuffix .= ")";
+													//prepend
+													$metricsuffix = ")" . $metricsuffix ;
+
 												}	
 											}
+
+
 	
 
 											//for agg, we need to use the index as defined so users can control order
@@ -516,10 +525,9 @@ echo "here - $index and $label ";
 										}
 									} else {
 									//this should be an ok case.
-										echo "empty metric pattern for $metricid..<br>";
+										echo "empty metric pattern for $index..<br>";
 									}
-	//echo "and metricid is $metricid<br>";
-									$metricid++;
+	//echo "and metricid is $index<br>";
 								} //done foreach patterns
 							} else {
 		//what do we do in this case..aka single metric mode
@@ -530,7 +538,6 @@ echo "here - $index and $label ";
 						}
 						$i++;
 
-echo "here 3<br>";		
 						//if we're not aggregating, spit out a graph here
 	//graph per metric
 	//					if ( !$aggregate ) {
@@ -540,7 +547,6 @@ echo "here 3<br>";
 							$metrics=array();
 							$i=0;
 						}
-		
 	//				echo "END of foreach match for $value, is is $i<Br>";
 	// 				echo "end foreach metrics are <Br>";
 	// 				echo "<pre>";
@@ -681,6 +687,7 @@ function produceGraph($name,$orderby,$sumgraphs,$aggregate) {
 
 ///////
 
+// ....here's where we do some aliases for sum!
 
 		$metricid=0;
 		//metricserieslist isn't ness sorted in the right order when we built it, so fix that
@@ -724,52 +731,79 @@ function produceGraph($name,$orderby,$sumgraphs,$aggregate) {
 	} //endif sumgraphs
 			
 
-	$ii=0;
-	$colors=array();
-//while this isn't our problem, we're already reversed, 
-//we shouldnt get in here if we have colors...	
-	while ( $ii <= count($metrics)-1 ) {
-	// if we don't define a set of colors to use, use our global set
-//if extra>colors is set, we still get in here.
-		if ( empty($templatecolors) ) {
-			if (! isset($colorid) )
-			//	$colorid = 0;
-				$colorid = rand(0, count($COLORS)-1);				
-			//prevent dup colors next to each other anyway	
-			if ( isset($lastcolorid) && $lastcolorid === $colorid ) 
-				$colorid++;
-			if ( $colorid > count($COLORS)-1 )
-			//	$colorid = 0;					
-				$colorid = rand(0, count($COLORS)-1);				
-
-				//$colorid = rand(0, count($COLORS)-1);				
-// echo "what about now.<br>";
-// echo "<pre>";
+// echo "in produce graph.<br><pre>";
 // print_r($metrics);
 // echo "</pre>";
-// echo "are we here? $COLORS[$colorid] <br>";
-			$colors[$ii] = $COLORS[$colorid];
-			$colorid++;
-			$ii++;
-		} else {
-		//if we defined a list of colors, use those as our source of color - still random though.
-			if (! isset($colorid) )
-			//	$colorid = 0;
-				$colorid = rand(0, count($templatecolors)-1);	
-			//prevent dup colors next to each other anyway	
-			if ( isset($lastcolorid) && $lastcolorid === $colorid ) 
+
+
+
+	//this could be extended to assign a color to the missing spot..if we moved it upstream
+	$colorcount=0; 
+	foreach ( array_keys($metrics) as $index) {
+		$metric=$metrics[$index];
+	//echo "got $index with $metric<br>";
+		if ( preg_match("/color\(/", $metric) ) {
+			$colorcount++;
+		// } else { 
+		// 	echo "NO no color please for $metric<br>";
+		}
+	}	
+
+	// IF colors are set per metric, AND are set for -all- metrics, just pass a fake value to graphfactory to set colorList short.
+	// otherwise, pass our random set of colors (for the extra metrics to choose from) -
+	// alternately, we could send nothing and GF choose.
+	if ( $colorcount == count($metrics) ) {
+		$colors="000";
+	} else {
+
+		$ii=0;
+		$colors=array();
+	//we shouldnt get in here if we have colors...	
+
+	// skipping this section lets graphfactory do it's colors -
+	// a good way to lose random if we want.	
+		while ( $ii <= count($metrics)-1 ) {
+		// if we don't define a set of colors to use, use our global set
+	//if extra>colors is set, we still get in here.
+			if ( empty($templatecolors) ) {
+				if (! isset($colorid) )
+				//	$colorid = 0;
+					$colorid = rand(0, count($COLORS)-1);				
+				//prevent dup colors next to each other anyway	
+				if ( isset($lastcolorid) && $lastcolorid === $colorid ) 
+					$colorid++;
+				if ( $colorid > count($COLORS)-1 )
+				//	$colorid = 0;					
+					$colorid = rand(0, count($COLORS)-1);				
+
+					//$colorid = rand(0, count($COLORS)-1);				
+	// echo "what about now.<br>";
+	// echo "<pre>";
+	// print_r($metrics);
+	// echo "</pre>";
+	// echo "are we here? $COLORS[$colorid] <br>";
+				$colors[$ii] = $COLORS[$colorid];
 				$colorid++;
-			if ( $colorid > count($templatecolors)-1 )
-			//	$colorid = 0;					
-				$colorid = rand(0, count($templatecolors)-1);				
-			$colors[$ii] = $templatecolors[$colorid];
-			$lastcolorid = $colorid;
-			$colorid++;
-			$ii++;
-print_r($colors);
+				$ii++;
+			} else {
+			//if we defined a list of colors, use those as our source of color - still random though.
+				if (! isset($colorid) )
+				//	$colorid = 0;
+					$colorid = rand(0, count($templatecolors)-1);	
+				//prevent dup colors next to each other anyway	
+				if ( isset($lastcolorid) && $lastcolorid === $colorid ) 
+					$colorid++;
+				if ( $colorid > count($templatecolors)-1 )
+				//	$colorid = 0;					
+					$colorid = rand(0, count($templatecolors)-1);				
+				$colors[$ii] = $templatecolors[$colorid];
+				$lastcolorid = $colorid;
+				$colorid++;
+				$ii++;
+	print_r($colors);
+			}
 		}
 	}
-
 
 	$graphtitle = $graphtitle . " (" . count($metrics) . ")";
 
@@ -790,7 +824,11 @@ print_r($colors);
 			'show_html_legend' => 1,
 			'show_copy_url' => 0,
 //			'height' => '120',
+//dsr - "safe" to send if we have our own per metric colors (it doesnt get used)..but nice to not send it or at least send it empty.
+
 			'colors' => $colors,
+//hack to keep an unused color list short
+//			'colors' => "000",
 //			'width' => '435',
 //			'area_mode' => 'first',
 //			'line_mode' => 'connected',

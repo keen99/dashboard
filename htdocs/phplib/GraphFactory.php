@@ -418,7 +418,9 @@ class GraphFactory {
                     echo "WARNING: No color name/value supported for $colors[$i]<br>";
                 }
             }
+//this sets colorList= on url, if we dont call it it's blank.
             $g->addMetric($metric, $color);
+
         }
 
         // Show deploys on low grain
