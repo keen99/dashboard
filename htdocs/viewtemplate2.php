@@ -2,7 +2,7 @@
 
 
 require_once 'phplib/Dashboard.php';
-require_once 'easod/functions2.php';
+require_once 'easod/functions.php';
 
 // thisneeds to be driven by something else?!
 require_once 'ls-templates.php';
