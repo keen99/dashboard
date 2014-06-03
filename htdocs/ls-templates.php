@@ -280,7 +280,7 @@ $graphTemplate['socketsused'] = array(
 
 
 
-
+//host +- agg
 // diamond.iad.app-cron01.loadavg.01
 $graphTemplate['loadavg'] = array(
 		'sectiontitle' => 'load average'
@@ -288,16 +288,26 @@ $graphTemplate['loadavg'] = array(
 		,'hostpattern' => '(.*)'
 		,'servicepattern' => '(loadavg)'
 		,'suffixpattern' => '(01|05|15)'
-		,'metricpatterns' => array (
-			'(loadavg.01)',
-			'(loadavg.05)',
-			'(loadavg.15)',
-		)
+        ,'metric' => array (
+	        '1m' => array (
+	        	'pattern' => '(loadavg.01)',
+	        	'alias' => '1 min loadavg',
+	        	'color' => 'EACC00', //yellowy
+				'function' => 'stacked'
+	        ),
+	        '5m' => array (
+	        	'pattern' => '(loadavg.05)',
+	        	'alias' => '5 min loadavg',
+	        	'color' => 'DE0056', //red
+//				'function' => 'keepLastValue'
+	        ),	        
+	        '15m' => array (
+	        	'pattern' => '(loadavg.15)',
+	        	'alias' => '15 min loadavg',
+	        	'color' => 'FF0000', //brightred
+//				'function' => 'keepLastValue'
+	        ),
+	    ),
 
-		,'metricaliases' => array (
-			"1 min loadavg",
-			"5 min loadavg",
-			"15 min loadavg",
 
-		)
 );
