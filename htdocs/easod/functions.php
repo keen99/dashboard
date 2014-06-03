@@ -412,7 +412,7 @@ function createGraphsFromTemplates($name, $orderby="service", $sumgraphs=false,$
 							if ( is_array($metric) ) {
 								//extract the index from the array we want
 								//see http://stackoverflow.com/a/14966376/3692967
-								foreach ( array_keys($metric) as $index => $label) {
+								foreach ( array_keys($metric) as $index => $label ) {
 									$metricval = $metric[$label];
 
 //echo "metric loop key $key - " . $metricval['alias']. "<br>";
@@ -425,7 +425,7 @@ function createGraphsFromTemplates($name, $orderby="service", $sumgraphs=false,$
 									if ( !empty($metricval['pattern']) ) {
 
 
-	//echo "testing $value for " . $metricval['pattern'] . "<Br>";
+//	echo "testing $value for " . $metricval['pattern'] . "<Br>";
 										 if ( preg_match("/.*" . $metricval['pattern'] . ".*/", $value) ) {
 											if (! isset($metricserieslist[$index]) )
 												$metricserieslist[$index] = "";
@@ -462,16 +462,17 @@ function createGraphsFromTemplates($name, $orderby="service", $sumgraphs=false,$
 
 // echo "here ";
 // echo "<pre>";
+// // print_r($metric);
 // print_r(array_keys($metric));
 // echo "</pre>";
 //exit;
 								//extract the index from the array we want
 								//see http://stackoverflow.com/a/14966376/3692967
-								foreach ( array_keys($metric) as $index => $label) {
+								foreach ( array_keys($metric) as $index => $label ) {
 									$metricval = $metric[$label];
 
-//echo "metric loop key $key - " . $metricval['alias']. "<br>";
-// echo "here - $index and $label ";
+// echo "metric loop " . $metricval['alias']. "<br>";
+// echo "initial metric matching - $index and $label ";
 // echo "<pre>";
 // print_r($metricval);
 // echo "</pre>";
@@ -479,15 +480,13 @@ function createGraphsFromTemplates($name, $orderby="service", $sumgraphs=false,$
 //continue;
 									if ( !empty($metricval['pattern']) ) {
 
-
-										 if ( preg_match("/.*" . $metricval['pattern'] . ".*/", $value) ) {
+										if ( preg_match("/.*" . $metricval['pattern'] . ".*/", $value) ) {
 
 //if we specify an alias, append it to our automatic alias.
 											if (!empty($metricval['alias']) ) 
 												$graphalias = $graphalias . " - " . $metricval['alias'];
 											$metricprefix = "";
 											$metricsuffix = "";
-
 
 											// must be outside of the function prefixes
 											if ( !empty($metricval['color']) ) {
@@ -507,8 +506,6 @@ function createGraphsFromTemplates($name, $orderby="service", $sumgraphs=false,$
 											}
 
 
-	
-
 											//for agg, we need to use the index as defined so users can control order
 												if ( $aggregate ) {
 												$whatmetric=$index;
@@ -518,13 +515,14 @@ function createGraphsFromTemplates($name, $orderby="service", $sumgraphs=false,$
 												$whatmetric=count($metrics);
 											}
 
+//echo "building $whatmetric with $value<br>";
 											$metrics[$whatmetric] = "cactiStyle(alias(" . $metricprefix . $value . $metricsuffix . ", \"$graphalias\"))";
 										} else {
 											//this is ok
 											//echo "HELP we didn't match a pattern1 - $value<br>";
 										}
 									} else {
-									//this should be an ok case.
+										//this should be an ok case.
 										echo "empty metric pattern for $index..<br>";
 									}
 	//echo "and metricid is $index<br>";
