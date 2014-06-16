@@ -55,7 +55,7 @@ $graphs = array(
     'Capacity' => $capacity_graphs,
 );
 
-$tabs = Dashboard::$HADOOP_TABS;
+$tabs = Local_Dashboard::$HADOOP_TABS;
 $tab_url = Dashboard::getTabUrl(__FILE__);
 
 include '../phplib/template.php';

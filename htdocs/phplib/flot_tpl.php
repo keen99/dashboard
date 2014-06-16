@@ -21,6 +21,7 @@ function slugify($str) {
         <script type="text/javascript" src="/assets/js/flot/jquery.flot.stack.js"></script>
         <script type="text/javascript" src="/assets/js/jquery.flot.trendline.js"></script>
         <script type="text/javascript" src="/assets/js/flot.js"></script>
+        <script type="text/javascript" src="/conf/config.js"></script>
         <script type="text/javascript" src="/assets/js/dashboard.js"></script>
         <?php
             if (isset($additional_head)){

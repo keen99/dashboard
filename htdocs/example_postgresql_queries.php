@@ -31,7 +31,7 @@ $graphs = array(
     "aggregated INSERT/UPDATE/DELETE" => $aggr_graph
 );
 
-$tabs = Dashboard::$DB_TABS;
+$tabs = Local_Dashboard::$DB_TABS;
 $tab_url = Dashboard::getTabUrl(__FILE__);
 
 include "phplib/template.php";

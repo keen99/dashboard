@@ -43,6 +43,7 @@
         echo "\n";
     }
     ?>
+    <script type="text/javascript" src="/conf/config.js"></script>
     <script type="text/javascript" src="/assets/js/dashboard.js"></script>
 </head>
 <body id="<?= $namespace ?>" class="dashboard">

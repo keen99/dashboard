@@ -1,20 +1,10 @@
 <?php
-require_once('phplib/Dashboard.php');
+//lets add CWD to path for everything future
+set_include_path(get_include_path() . PATH_SEPARATOR . dirname(__FILE__));
 
-$sections = array(
-    'Application' => array(
-        'Deploy' => Dashboard::$DEPLOY_TABS,
-    ),
-    'Operations' => array(
-        'Database' => Dashboard::$DB_TABS,
-        'Network' => Dashboard::$NETWORK_TABS,
-        'Chef' => array(
-            'chef' => '/example_chef.php',
-        ),
-        'Hadoop' => Dashboard::$HADOOP_TABS,
-        'Util' => Dashboard::$TIME_TABS,
-    ),
-);
+require_once('conf/sections.inc');
+
+
 ?>
 <!DOCTYPE html>
 <html>

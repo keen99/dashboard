@@ -12,10 +12,7 @@ var image_index = 0;
 var default_refresh_timeout = 4000;
 var refresh_timeout = (typeof refresh_timeout !== 'undefined' ? refresh_timeout : default_refresh_timeout);
 
-/* Define your graph servers here */
-var ganglia_server = 'ganglia.example.com';
-var graphite_server = 'graphite.example.com';
-var cacti_server = 'cacti.example.com';
+// config vars moved to conf/config.js
 
 function refreshImage() {
     if (image_index < document.images.length) {
